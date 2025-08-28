@@ -173,7 +173,7 @@
     </div>
   </div>
 
-  <!-- Este div debe estar SIEMPRE renderizado -->
+  <!-- CANVAS DE ACTIVIDADES EN PROCESO Y ASIGNACIONES -->
   <div class="offcanvas offcanvas-end rounded-5" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel" style="z-index: 1100; width: 500px; margin: 1rem;">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="offcanvasScrollingLabel">{{ actividadSeleccionada?.actividad }}</h5>

@@ -55,14 +55,14 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/calendario',
-    name: 'Calendario',
+    path: '/Reportes',
+    name: 'Reportes',
     component: () => import('@/views/ReportsView.vue'),
     meta: {
       requiresAuth: true,
       layout: 'admin',
       title: 'Panel de Administración',
-      icon: 'bi-calendar3'
+      icon: 'bi-file-earmark-text'
     }
   },
   {
