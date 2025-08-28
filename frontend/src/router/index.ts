@@ -57,7 +57,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/calendario',
     name: 'Calendario',
-    component: () => import('@/views/CalendarView.vue'),
+    component: () => import('@/views/ReportsView.vue'),
     meta: {
       requiresAuth: true,
       layout: 'admin',
