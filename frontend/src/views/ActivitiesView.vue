@@ -173,81 +173,71 @@
     </div>
   </div>
 
-  <!-- CANVAS DE ACTIVIDADES EN PROCESO Y ASIGNACIONES -->
-  <div class="offcanvas offcanvas-end rounded-5" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel" style="z-index: 1100; width: 500px; margin: 1rem;">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasScrollingLabel">{{ actividadSeleccionada?.actividad }}</h5>
+  <!-- Este div debe estar SIEMPRE renderizado -->
+  <div class="offcanvas offcanvas-end rounded-3 p-3 pt-0" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel" style="z-index: 1100; width: 800px; margin: 1rem;">
+    <div class="offcanvas-header border-bottom">
+      <h5 class="fw-bold">Detalles de la actividad</h5>
+      <!-- <h5 class="offcanvas-title" id="offcanvasScrollingLabel">{{ actividadSeleccionada?.actividad }}</h5> -->
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
     </div>
     <div class="offcanvas-body">
-      <table class="table table-borderless">
-        <tbody>
-          <tr>
-            <td>
-              <i class="bi bi-clock-history text-black-50"></i>
-              <span style="margin-left: 1rem;" class="text-black-50">Fecha de asignación</span>
-            </td>
-            <td>{{ formatearFecha(actividadSeleccionada?.fecha_creacion) }}</td>
-          </tr>
-          <tr>
-            <td>
-              <i class="bi bi-arrow-repeat text-black-50"></i>
-              <span style="margin-left: 1rem;" class="text-black-50">Estado</span>            
-            </td>
-            <td>
-              <span
-                class="badge fw-semibold d-inline-flex align-items-center"
-                :class="{
-                  'bg-success-subtle text-success': actividadSeleccionada?.avance === 100,
-                  'bg-warning-subtle text-warning': actividadSeleccionada?.avance > 0 && actividadSeleccionada?.avance < 100
-                }"
-                :style="actividadSeleccionada?.avance === 0 ? 'color: #8a0bd2; background-color: rgba(91, 6, 114, 0.2);' : ''"
-              >
-                <span class="fw-bold" v-if="actividadSeleccionada?.avance === 0">• No iniciado</span>
-                <span class="fw-bold" v-else-if="actividadSeleccionada?.avance < 100">• En progreso</span>
-                <span class="fw-bold" v-else>• Completo</span>
-              </span>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <i class="bi bi-check-circle text-black-50"></i>
-              <span style="margin-left: 1rem;" class="text-black-50">Prioridad</span>
-            </td>
-            <td>
-              <span class="badge"
-              :class="{
-                'bg-danger-subtle': actividadSeleccionada?.prioridad === 'alta',
-                'bg-success-subtle': actividadSeleccionada?.prioridad === 'baja',
-                'bg-warning-subtle': actividadSeleccionada?.prioridad === 'media',
-                'text-danger': actividadSeleccionada?.prioridad === 'alta',
-                'text-success': actividadSeleccionada?.prioridad === 'baja',
-                'text-warning': actividadSeleccionada?.prioridad === 'media',
-              }">{{ actividadSeleccionada?.prioridad }}</span>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <i class="bi bi-calendar-week text-black-50"></i>
-              <span style="margin-left: 1rem;" class="text-black-50">Fecha Limite</span>
-            </td>
-            <td>{{ formatearFecha(actividadSeleccionada?.fecha_limite) }}</td>
-          </tr>
-          <tr>
-            <td>
-              <i class="bi bi-stopwatch text-black-50"></i>
-              <span style="margin-left: 1rem;" class="text-black-50">Horas trabajadas</span>
-            </td>
-            <td>{{ actividadSeleccionada?.horas_trabajadas }} hrs trabajadas</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="border rounded-4 bg-body-secondary mb-2" style="padding: 10px; padding-left: 1rem;">
-        <div>
-          <p class="fw-bold">Descripción de la actividad</p>
-          <p>{{ actividadSeleccionada?.descripcion }}</p>
+      <div class="d-flex">
+        <div class="border-end border-bottom p-2" style="width: 60%; height: 50%;">
+          <small>ACTIVIDAD</small>
+          <h3 class="fw-bold">{{ actividadSeleccionada?.actividad }}</h3>
+          <small>{{ formatearFecha(actividadSeleccionada?.fecha_creacion) }}</small>
+
+          <div class="mt-4">
+            <small>PROYECTO</small>
+            <p class="fs-5 fw-bold">{{ actividadSeleccionada?.proyecto }}</p>
+          </div>
+
+          <div class="p-1 mt-4">
+            <h6 class="fw-bold">Descripción de la actividad</h6>
+            <p>{{ actividadSeleccionada?.descripcion }}</p>
+          </div>
+          
+        </div>
+        <div class="p-2 border-bottom" style="width: 40%;">
+          <h5 class="fw-bold">Detalles adicionales</h5>
+
+          <div class="row p-2">
+            <small class="mt-3">ESTADO</small>
+            <div class="d-flex">
+              <span 
+                 class="badge fw-semi-bold d-inline-flex align-items-center"
+                 :class="{
+                   'bg-success-subtle text-success': actividadSeleccionada?.avance === 100,
+                   'bg-warning-subtle text-warning': actividadSeleccionada?.avance > 0 && actividadSeleccionada?.avance < 100
+                 }"
+                 :style="actividadSeleccionada?.avance === 0 ? 'color: #8a0bd2; background-color: rgba(91, 6, 114, 0.2);' : ''"
+               >
+                 <span class="fw-bold" v-if="actividadSeleccionada?.avance === 0">• No iniciado</span>
+                 <span class="fw-bold" v-if="actividadSeleccionada?.avance < 100">• En progreso</span>
+                 <span class="fw-bold" v-else>• Completado</span>
+               </span>
+
+                <span 
+                  class="badge ms-3"
+                  :class="{
+                    'bg-danger-subtle': actividadSeleccionada?.prioridad === 'alta',
+                    'bg-success-subtle': actividadSeleccionada?.prioridad === 'baja',
+                    'bg-warning-subtle': actividadSeleccionada?.prioridad === 'media',
+                    'text-danger': actividadSeleccionada?.prioridad === 'alta',
+                    'text-success': actividadSeleccionada?.prioridad === 'baja',
+                    'text-warning': actividadSeleccionada?.prioridad === 'media',
+                  }"  
+                >{{ actividadSeleccionada?.prioridad }}</span>
+            </div>
+            <small class="mt-3">FECHA LIMITE</small>
+            <div class="fw-bold">{{ formatearFecha(actividadSeleccionada?.fecha_creacion) }}</div> 
+
+            <small class="mt-3">FECHA CREACIÓN</small>
+            <div class="fw-bold">{{ formatearFecha(actividadSeleccionada?.fecha_limite) }}</div>
+          </div>
         </div>
       </div>
+      
       <div class="mb-3">
         <ul class="nav nav-underline">
           <li class="nav-item">
@@ -259,50 +249,57 @@
         </ul>
       </div>
       <div v-if="vistaActual === 'formulario'">
-        <form @submit.prevent="guardarAvance" v-if="actividadSeleccionada">
-          <div class="d-flex justify-content-center">
-            <div>
-              <label class="form-label text-black-50">Avance actividad</label>
-              <div class="d-flex justify-content-center align-items-center">
-                <input 
-                  type="number"
-                  v-model="actividadSeleccionada.avance"
-                  @input="actividadSeleccionada.avance = Math.min(100, Math.max(0, actividadSeleccionada.avance))"
-                  class="form-control text-center fs-1 fw-bold border-0" 
-                  style="height: 5rem; max-width: 55%;" 
-                />
-                <span class="text-center fs-1 fw-bold d-flex align-items-center">%</span>
-              </div>
-            </div>
-            <div>
-              <label class="form-label text-black-50">Horas trabajadas</label>
-              <div class="d-flex justify-content-center align-items-center">
-                <input 
-                  type="number"
-                  v-model="horas_trabajadas"
-                  placeholder="0"
-                  class="form-control text-center fs-1 fw-bold border-0" 
-                  style="height: 5rem; max-width: 45%;" 
-                />
-                <span class="text-center fs-1 fw-bold d-flex align-items-center">hrs</span>
-              </div>
-            </div>
-          </div>
-          <div class="d-flex justify-content-end">
-            <button 
-              type="submit"
-              class="rounded-4 btn btn-outline-primary guardar-expandible d-flex align-items-center"
+
+        <form @submit.prevent="guardarAvance">
+            <div class="inputs-row">
+              <!-- Avance Actividad -->
+              <CircularProgress 
+                :value="actividadSeleccionada.avance" 
+                :max="100" 
+                :is-hours="false"
               >
+                <div class="input-label">Avance actividad</div>
+                <input 
+                  type="number" 
+                  v-model.number="actividadSeleccionada.avance" 
+                  min="0" 
+                  max="100" 
+                  class="circular-input"
+                  @input="actividadSeleccionada.avance = Math.min(100, Math.max(0, actividadSeleccionada.avance))"
+                />
+                <div class="input-unit">%</div>
+              </CircularProgress>
+
+              <!-- Horas Trabajadas -->
+              <CircularProgress 
+                :value="horas_trabajadas" 
+                :max="Math.max(8, horas_trabajadas)" 
+                :is-hours="true"
+              >
+                <div class="input-label">Horas trabajadas</div>
+                <input 
+                  type="number" 
+                  v-model.number="horas_trabajadas" 
+                  min="0" 
+                  class="circular-input hours-input"
+                />
+                <div class="input-unit">hrs</div>
+              </CircularProgress>
+            </div>
+
+          <!-- Botón -->
+          <div class="d-flex justify-content-end mt-4">
+            <button 
+              type="submit" 
+              class="rounded-4 btn btn-outline-primary guardar-expandible d-flex align-items-center"
+            >
               <i class="bi bi-floppy fs-6"></i>
-              <span class="guardar-text" style="margin-left: 1rem;">Guardar</span>
+              <span class="guardar-text">Guardar</span>
             </button>
-          </div>
+          </div>        
         </form>
-        <h6 class="fw-bold mb-3">Progreso de la actividad</h6>
-        <div class="progress" role="progressbar" aria-label="Animated striped example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-          <div class="progress-bar progress-bar-striped progress-bar-animated" :style="{ width: actividadSeleccionada?.avance + '%' }">{{ actividadSeleccionada?.avance }}%</div>
-        </div>
       </div>
+    </div>
       <div v-if="vistaActual === 'estado'">
         <table class="table">
           <thead class="table-light">
@@ -326,9 +323,6 @@
           </tbody>
         </table>
       </div>
-
-
-    </div>
   </div>
 
   <!-- Modal de confirmación para horas extra -->
@@ -381,7 +375,7 @@ import { useToast } from 'vue-toastification'
 import CustomToast from './CustomToast.vue'
 import { h } from 'vue'
 import CompletadoModal from '@/components/CompletadoModal.vue'
-
+import CircularProgress from '@/components/CircularProgress.vue'
 
 dayjs.locale('es')
 
@@ -393,7 +387,8 @@ export default {
   name: 'AcivitiesView',
   components: {
     ActividadModal,
-    CompletadoModal
+    CompletadoModal,
+    CircularProgress
   },
   data() {
     return {
@@ -404,7 +399,7 @@ export default {
       asignaciones: [],
       enProgreso: [],
       completadas: [],
-      actividadSeleccionada: null,
+      d: null,
       showModal: false,
       horasHoy: 0,
       modalHorasExtra: false,
@@ -416,7 +411,10 @@ export default {
       cModal: false,
       selectedActivity: {},
       hoyHoras: 0,
-      intervaloHoras: null
+      intervaloHoras: null,
+      actividadSeleccionada : {
+        avance: 0
+      }
     }
   },
   methods: {
@@ -756,5 +754,59 @@ export default {
 
 .guardar-expandible:hover .guardar-text {
   opacity: 1;
+}
+
+.circular-input {
+    width: 80px;
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #495057;
+}
+
+.hours-input:focus {
+    color: #28a745;
+}
+
+.input-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 5px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.input-unit {
+    font-size: 1.2rem;
+    color: #6c757d;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.inputs-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 40px 0;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .inputs-row {
+        flex-direction: column;
+        gap: 30px;
+    }
 }
 </style>
