@@ -5,7 +5,7 @@
       <!-- Los segmentos se generan dinámicamente -->
     </div>
     
-    <!-- Contenido central (input) -->
+    <!-- Contenido central (inputs) -->
     <div class="circle-content">
       <slot></slot>
     </div>
@@ -16,23 +16,44 @@
 export default {
   name: "CircularProgress",
   props: {
-    value: { 
+    // Porcentaje de avance (0-100)
+    avance: { 
       type: Number, 
       default: 0 
     },
-    max: { 
+    // Número total de segmentos en el círculo
+    totalSegments: { 
       type: Number, 
-      default: 100 
+      default: 24 
     },
-    isHours: { 
-      type: Boolean, 
-      default: false 
+    // Tamaño del componente
+    size: { 
+      type: Number, 
+      default: 200 
+    },
+    // Color de los segmentos activos
+    activeColor: { 
+      type: String, 
+      default: '#007bff' 
     }
   },
   data() {
     return {
-      segments: [],
-      currentMaxSegments: 20
+      segments: []
+    }
+  },
+  computed: {
+    // Calcular cuántos segmentos deben estar activos
+    activeSegmentsCount() {
+      return Math.ceil((this.avance / 100) * this.totalSegments)
+    },
+    // Calcular el radio basado en el tamaño
+    radius() {
+      return (this.size * 0.85) / 2
+    },
+    // Centro del círculo
+    center() {
+      return this.size / 2
     }
   },
   mounted() {
@@ -40,20 +61,16 @@ export default {
     this.updateProgress()
   },
   watch: {
-    value(newVal) { 
+    avance() { 
       this.updateProgress()
     },
-    max(newVal) { 
-      if (this.isHours && newVal > 8) {
-        this.expandSegments(newVal)
-      }
+    totalSegments() {
+      this.initCircle()
       this.updateProgress()
     }
   },
   methods: {
     initCircle() {
-      // Determinar número inicial de segmentos
-      this.currentMaxSegments = this.isHours ? 8 : 20
       this.createSegments()
     },
 
@@ -65,56 +82,63 @@ export default {
       container.innerHTML = ''
       this.segments = []
 
-      const radius = 85 // Radio del círculo
-      const centerX = 100 // Centro X
-      const centerY = 100 // Centro Y
+      // Actualizar el tamaño del contenedor
+      const wrapper = this.$refs.container
+      wrapper.style.width = this.size + 'px'
+      wrapper.style.height = this.size + 'px'
+      container.style.width = this.size + 'px'
+      container.style.height = this.size + 'px'
 
-      for (let i = 0; i < this.currentMaxSegments; i++) {
+      for (let i = 0; i < this.totalSegments; i++) {
         const segment = document.createElement('div')
         segment.className = 'segment'
         
         // Calcular ángulo para distribuir uniformemente
-        const angle = (i / this.currentMaxSegments) * 360 - 90 // -90 para empezar arriba
+        const angle = (i / this.totalSegments) * 360 - 90 // -90 para empezar arriba
         const radian = (angle * Math.PI) / 180
         
         // Calcular posición
-        const x = centerX + radius * Math.cos(radian)
-        const y = centerY + radius * Math.sin(radian)
+        const x = this.center + this.radius * Math.cos(radian)
+        const y = this.center + this.radius * Math.sin(radian)
+        
+        // Tamaño del segmento proporcional al tamaño total
+        const segmentWidth = Math.max(2, this.size * 0.04)
+        const segmentHeight = Math.max(8, this.size * 0.1)
         
         // Posicionar y rotar el segmento
-        segment.style.left = (x - 4) + 'px'
-        segment.style.top = (y - 10) + 'px'
+        segment.style.left = (x - segmentWidth/2) + 'px'
+        segment.style.top = (y - segmentHeight/2) + 'px'
+        segment.style.width = segmentWidth + 'px'
+        segment.style.height = segmentHeight + 'px'
         segment.style.transform = `rotate(${angle + 90}deg)`
         
         container.appendChild(segment)
         this.segments.push(segment)
       }
-    },
 
-    expandSegments(newMax) {
-      if (this.isHours && newMax > 8) {
-        // Calcular nuevos segmentos necesarios
-        const newSegmentCount = Math.max(8, Math.ceil(newMax / 8) * 8)
-        if (newSegmentCount > this.currentMaxSegments) {
-          this.currentMaxSegments = newSegmentCount
-          this.createSegments()
-        }
+      // Actualizar el contenido central
+      const circleContent = wrapper.querySelector('.circle-content')
+      if (circleContent) {
+        const contentSize = this.size * 0.75
+        circleContent.style.width = contentSize + 'px'
+        circleContent.style.height = contentSize + 'px'
       }
     },
 
     updateProgress() {
       if (this.segments.length === 0) return
-
-      const maxValue = this.isHours ? Math.max(this.max, 8) : this.max
-      const percentage = Math.min(100, (this.value / maxValue) * 100)
-      const activeSegments = Math.ceil((percentage / 100) * this.segments.length)
       
       this.segments.forEach((segment, index) => {
-        segment.classList.remove('active', 'hours-active')
-        if (index < activeSegments) {
-          segment.classList.add(this.isHours ? 'hours-active' : 'active')
+        segment.classList.remove('active')
+        if (index < this.activeSegmentsCount) {
+          segment.classList.add('active')
         }
       })
+    },
+
+    // Método público para actualizar el avance
+    setAvance(nuevoAvance) {
+      this.avance = Math.max(0, Math.min(100, nuevoAvance))
     }
   }
 }
@@ -142,20 +166,18 @@ export default {
   position: absolute;
   width: 8px;
   height: 20px;
-  border-radius: 4px;
+  border-radius: 2px;
   background-color: #e9ecef;
-  transform-origin: center bottom;
-  transition: all 0.3s ease;
+  transform-origin: center center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.3;
 }
 
 .segment.active {
-  background: linear-gradient(135deg, #007bff, #0056b3);
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
-}
-
-.segment.hours-active {
-  background: linear-gradient(135deg, #28a745, #1e7e34);
-  box-shadow: 0 0 8px rgba(40, 167, 69, 0.4);
+  background: linear-gradient(135deg, v-bind(activeColor), color-mix(in srgb, v-bind(activeColor) 80%, black));
+  box-shadow: 0 0 12px color-mix(in srgb, v-bind(activeColor) 60%, transparent);
+  opacity: 1;
+  transform: rotate(var(--rotation)) scale(1.1);
 }
 
 .circle-content {
@@ -163,16 +185,72 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 160px;
-  height: 160px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
-  background: white;
+  background: linear-gradient(145deg, #ffffff, #f5f5f5);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  border: 3px solid #f8f9fa;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    inset 0 2px 8px rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(255, 255, 255, 0.8);
   z-index: 1;
+  backdrop-filter: blur(10px);
+}
+
+/* Responsive para diferentes tamaños */
+@media (max-width: 768px) {
+  .circular-progress-wrapper {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .segments-container {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .circle-content {
+    width: 110px;
+    height: 110px;
+  }
+}
+
+/* Animación de entrada */
+.segment {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+}
+
+/* Animación para segmentos activos */
+.segment.active {
+  animation: activateSegment 0.5s ease-out forwards;
+}
+
+@keyframes activateSegment {
+  0% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
 }
 </style>

@@ -1,329 +1,428 @@
 <template>
-  <div class="userview-content">
-    <!-- Título -->
-    <div class="d-flex justify-content-between">
-      <div class="card-body d-flex justify-content-between">
-        <h4 class="fs-4 fw-bolder">Actividades</h4>
-
-
-        <button type="button" class="btn btn-outline-primary" @click="showModal = true">
-          <i class="bi bi-plus-circle-dotted"></i>
-          Nueva Actividad
-        </button>
+  <div class="content-view">
+    <!-- Header Section -->
+    <div class="header-section mb-5">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h2 class="page-title mb-1">Gestión de Actividades</h2>
+          <p class="page-subtitle">Organiza y gestiona tus tareas en un tablero Kanban</p>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <span class="badge bg-primary-subtle text-primary fs-6">
+            <i class="bi bi-clock me-1"></i>
+            {{ hoyHoras }} hrs registradas hoy
+          </span>
+          <button type="button" class="btn btn-primary" @click="showModal = true">
+            <i class="bi bi-plus-circle me-2"></i>
+            Nueva Actividad
+          </button>
+        </div>
       </div>
     </div>
-    
-    <div style="margin-left: 1rem;" class="text-end">
-      <small class="fw-semibold">
-        <span class="badge text-bg-primary bg-gradient">{{ hoyHoras }} hrs</span> 
-        registradas hoy
-      </small>
-    </div>
 
-    <!-- Contenido según la vista -->
-    <div class="row g-2 m-4 justify-content-between  w-100">
-      <div v-if="currentView === 'board'" class="row row-cols-md-3 g-2 d-flex justify-content-between">
-        
+    <!-- Kanban Board -->
+    <div class="kanban-board">
+      <div class="row g-4">
         <!-- ASIGNACIONES -->
-        <div 
-          class="bg-dark-subtle rounded-5 border-light-subtle"
-          style="max-width: 32%; height: 450px;" 
-        >
-          <div class="d-flex flex-column" style="padding: .5rem; height: 100%;">
-            
-            <!-- Encabezado -->
-            <div class="d-flex mb-3 align-items-center justify-content-between" style="padding-top: 1rem; padding-right: .5rem;">
-              <h5 class="card-title mb-0 me-2">
-                <span class="text-warning">•</span> Asignaciones
-              </h5>
-              <span class="badge bg-secondary">{{ asignaciones.length }}</span>
+        <div class="col-12 col-lg-4">
+          <div class="kanban-column card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-0 pt-4 pb-2">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title fw-bold">
+                  <span class="text-warning">•</span> Asignaciones
+                </h5>
+                <span class="badge bg-secondary">{{ asignaciones.length }}</span>
+              </div>
             </div>
-
-            <!-- Contenedor con scroll -->
-            <div 
-              class="overflow-auto" 
-              style="flex: 1 1 auto; min-height: 0; max-height: 100%; padding-right: 4px;"
-            >
+            <div class="card-body kanban-column-body">
               <div 
-                v-for="(actividad, index) in asignaciones" 
+                v-for="actividad in asignaciones" 
                 :key="actividad.id" 
-                class="mb-2 bg-white border rounded-4 small p-2 shadow-sm"
-                style="min-width: 0; cursor: pointer;"
+                class="kanban-card card border-0 shadow-sm mb-3"
+                @click="abrirOffcanvas(actividad)"
+                data-status="not-started"
               >
-                <div @click="abrirOffcanvas(actividad)" class="p-2">
-                  <div class="d-flex justify-content-center fw-bold rounded-2 mb-1" style="font-size: 0.75rem; color: #8a0bd2; background-color: rgba(91, 6, 114, 0.2);">
+                <div class="card-body p-3">
+                  <div class="d-flex justify-content-center fw-bold rounded-2 mb-2 py-1 status-badge status-not-started">
                     No iniciado
                   </div>
-                  <p class="fw-bold text-truncate mb-1">{{ actividad.actividad }}</p>
-                  <p class="text-muted descripcion-recortada small mb-1">{{ actividad.descripcion }}</p>
+                  <h6 class="card-title fw-bold text-truncate">{{ actividad.actividad }}</h6>
+                  <p class="card-text text-muted descripcion-recortada small mb-2">{{ actividad.descripcion }}</p>
                   <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted"><i class="bi bi-clock-history"></i> {{ actividad.horas_trabajadas }} hrs</small>
-                    <div 
-                      class="text-center mt-1 rounded fw-bold mx-auto" 
-                      :class="[badgeBgClass(actividad.prioridad), badgeTextClass(actividad.prioridad)]"
-                      style="width: 70px; font-size: 0.75rem;"
-                    >
+                    <small class="text-muted"><i class="bi bi-clock me-1"></i> {{ actividad.horas_trabajadas }} hrs</small>
+                    <span class="badge fw-bold" :class="badgePriorityClass(actividad.prioridad)">
                       {{ actividad.prioridad }}
-                    </div>
-                    <small class="text-muted"><i class="bi bi-flag"></i> {{ formatearFecha(actividad.fecha_limite) }}</small>
+                    </span>
+                    <small class="text-muted"><i class="bi bi-calendar me-1"></i> {{ formatearFecha(actividad.fecha_limite) }}</small>
                   </div>
                 </div>
+              </div>
+              <div v-if="asignaciones.length === 0" class="empty-kanban-state text-center py-5">
+                <i class="bi bi-inbox display-4 text-muted"></i>
+                <p class="text-muted mt-2">No hay asignaciones</p>
               </div>
             </div>
           </div>
         </div>
-        <!-- En progreso -->
-        <div 
-          class="card bg-dark-subtle rounded-5 border-light-subtle" 
-          style="max-width: 32%; height: 450px;">
 
-          <div class="d-flex flex-column" style="height: 100%; padding: .5rem;">
-            
-            <!-- Encabezado -->
-            <div class="d-flex mb-3 align-items-center justify-content-between" style="padding-top: 1rem; padding-right: .5rem;">
-              <h5 class="card-title mb-0 me-2">
-                <span class="text-primary">•</span> En progreso
-              </h5>
-              <span class="badge bg-secondary">{{ enProgreso.length }}</span>
+        <!-- EN PROGRESO -->
+        <div class="col-12 col-lg-4">
+          <div class="kanban-column card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-0 pt-4 pb-2">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title fw-bold">
+                  <span class="text-primary">•</span> En progreso
+                </h5>
+                <span class="badge bg-secondary">{{ enProgreso.length }}</span>
+              </div>
             </div>
-            
-            <!-- Contenedor con scroll -->
-            <div 
-              class="overflow-auto" 
-              style="flex: 1 1 auto; min-height: 0; max-height: 100%; padding-right: 4px;"
-            >
+            <div class="card-body kanban-column-body">
               <div 
-                v-for="(actividad, index) in enProgreso" 
+                v-for="actividad in enProgreso" 
                 :key="actividad.id" 
-                class="mb-2 bg-white border rounded-4 small p-2 shadow-sm"
-                style="min-width: 0; cursor: pointer;"
+                class="kanban-card card border-0 shadow-sm mb-3"
+                @click="abrirOffcanvas(actividad)"
+                data-status="in-progress"
               >
-                <div @click="abrirOffcanvas(actividad)" class="p-2">
-                  <div class="d-flex justify-content-center bg-warning-subtle text-warning fw-bold rounded-2 mb-1" style="font-size: 0.75rem;">
+                <div class="card-body p-3">
+                  <div class="d-flex justify-content-center bg-warning-subtle text-warning fw-bold rounded-2 mb-2 py-1 status-badge status-in-progress">
                     En progreso
                   </div>
-                  <p class="fw-bold text-truncate mb-1">{{ actividad.actividad }}</p>
-                  <p class="text-muted descripcion-recortada small mb-1">{{ actividad.descripcion }}</p>
+                  <h6 class="card-title fw-bold text-truncate">{{ actividad.actividad }}</h6>
+                  <p class="card-text text-muted descripcion-recortada small mb-2">{{ actividad.descripcion }}</p>
                   <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted"><i class="bi bi-clock-history"></i> {{ actividad.horas_trabajadas }} hrs</small>
-                    <div 
-                      class="text-center mt-1 rounded fw-bold mx-auto" 
-                      :class="[badgeBgClass(actividad.prioridad), badgeTextClass(actividad.prioridad)]"
-                      style="width: 70px; font-size: 0.75rem;"
-                    >
+                    <small class="text-muted"><i class="bi bi-clock me-1"></i> {{ actividad.horas_trabajadas }} hrs</small>
+                    <span class="badge fw-bold" :class="badgePriorityClass(actividad.prioridad)">
                       {{ actividad.prioridad }}
-                    </div>
-                    <small class="text-muted"><i class="bi bi-flag"></i> {{ formatearFecha(actividad.fecha_limite) }}</small>
+                    </span>
+                    <small class="text-muted"><i class="bi bi-calendar me-1"></i> {{ formatearFecha(actividad.fecha_limite) }}</small>
                   </div>
                 </div>
               </div>
+              <div v-if="enProgreso.length === 0" class="empty-kanban-state text-center py-5">
+                <i class="bi bi-inbox display-4 text-muted"></i>
+                <p class="text-muted mt-2">No hay actividades en progreso</p>
+              </div>
             </div>
-          </div>  
+          </div>
         </div>
-        <!-- Completadas -->
-        <div 
-          class="bg-dark-subtle rounded-5 border-light-subtle"
-          style="max-width: 32%; height: 450px;" 
-        >
-          <div class="d-flex flex-column" style="padding: .5rem; height: 100%;">
-            
-            <!-- Encabezado -->
-            <div class="d-flex mb-3 align-items-center justify-content-between" style="padding-top: 1rem; padding-right: .5rem;">
-              <h5 class="card-title mb-0 me-2">
-                <span style="color: #FF0080;">•</span> Completadas
-              </h5>
-              <span class="badge bg-secondary">{{ completadas.length }}</span>
-            </div>
 
-            <!-- Contenedor con scroll -->
-            <div 
-              class="overflow-auto" 
-              style="flex: 1 1 auto; min-height: 0; max-height: 100%; padding-right: 4px;"
-            >
+        <!-- COMPLETADAS -->
+        <div class="col-12 col-lg-4">
+          <div class="kanban-column card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-0 pt-4 pb-2">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title fw-bold">
+                  <span style="color: #FF0080;">•</span> Completadas
+                </h5>
+                <div>
+                  <span class="badge bg-secondary me-2">{{ completadas.length }}</span>
+                  <button 
+                    @click="toggleFilter"
+                    class="btn btn-sm btn-outline-secondary"
+                  >
+                    <i class="bi bi-funnel me-1"></i> Filtrar
+                  </button>
+                </div>
+              </div>
+              <!-- Filtro -->
+              <div class="card mt-3" v-if="mostrarFiltro">
+                <div class="card-body">
+                  <h6 class="card-title fw-bold">Filtrar por rango de fechas</h6>
+                  <select v-model="selectedYear" class="form-select form-select-sm mb-2">
+                    <option v-for="year in years" :key="year" :value="year">
+                      {{ year }}
+                    </option>
+                  </select>
+                  <v-date-picker
+                    v-model.range="rango"
+                    :masks="{ input: 'DD/MM/YYYY' }"
+                    :popover="{ visibility: 'click' }"
+                    color="blue"
+                    is-range
+                  >
+                    <template #default="{ inputValue, inputEvents }">
+                      <input
+                        id="rango"
+                        class="form-control form-control-sm"
+                        style="cursor: pointer;"
+                        :value="inputValue.start && inputValue.end ? `${inputValue.start} - ${inputValue.end}` : ''"
+                        v-on="inputEvents"
+                        readonly
+                        placeholder="Selecciona un rango de fechas"
+                      />
+                    </template>
+                  </v-date-picker>
+                  <button class="btn btn-sm btn-primary mt-2 w-100" @click="filtrarPorFechas">
+                    Aplicar filtro
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card-body kanban-column-body">
               <div 
-                v-for="(actividad) in completadas" 
+                v-for="actividad in completadas" 
                 :key="actividad.id" 
-                class="mb-2 bg-white border rounded-4 small p-2 shadow-sm"
-                style="min-width: 0; cursor: pointer;"
+                class="kanban-card card border-0 shadow-sm mb-3"
+                @click="datosCompletos(actividad)"
+                data-status="completed"
               >
-                <div @click="datosCompletos(actividad)" class="p-2">
-                  <div class="d-flex justify-content-center bg-success-subtle text-success fw-semibold rounded-2 mb-1" style="font-size: 0.75rem;">
-                    Completo
+                <div class="card-body p-3">
+                  <div class="d-flex justify-content-center bg-success-subtle text-success fw-bold rounded-2 mb-2 py-1 status-badge status-completed">
+                    Completado
                   </div>
-                  <p class="fw-bold text-truncate mb-1">{{ actividad.actividad }}</p>
-                  <p class="text-muted descripcion-recortada small mb-1">{{ actividad.descripcion }}</p>
+                  <h6 class="card-title fw-bold text-truncate">{{ actividad.actividad }}</h6>
+                  <p class="card-text text-muted descripcion-recortada small mb-2">{{ actividad.descripcion }}</p>
                   <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted"><i class="bi bi-clock-history"></i> {{ actividad.horas_trabajadas }} hrs</small>
-                    <div 
-                      class="text-center mt-1 rounded fw-bold mx-auto" 
-                      :class="[badgeBgClass(actividad.prioridad), badgeTextClass(actividad.prioridad)]"
-                      style="width: 70px; font-size: 0.75rem;"
-                    >
+                    <small class="text-muted"><i class="bi bi-clock me-1"></i> {{ actividad.horas_trabajadas }} hrs</small>
+                    <span class="badge fw-bold" :class="badgePriorityClass(actividad.prioridad)">
                       {{ actividad.prioridad }}
-                    </div>
-                    <small class="text-muted"><i class="bi bi-flag"></i> {{ formatearFecha(actividad.fecha_limite) }}</small>
+                    </span>
+                    <small class="text-muted"><i class="bi bi-calendar me-1"></i> {{ formatearFecha(actividad.fecha_limite) }}</small>
                   </div>
+                </div>
+              </div>
+              <div v-if="completadas.length === 0" class="empty-kanban-state text-center py-5">
+                <i class="bi bi-inbox display-4 text-muted"></i>
+                <p class="text-muted mt-2">No hay actividades completadas</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Offcanvas de detalles -->
+<!-- Offcanvas de detalles (parte actualizada) -->
+<div class="offcanvas offcanvas-end" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel" style="width: 800px;">
+  <div class="offcanvas-header border-bottom">
+    <h5 class="offcanvas-title fw-bold text-primary" id="offcanvasScrollingLabel">
+      <i class="bi bi-card-checklist me-2"></i>
+      Detalles de la Actividad
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+  </div>
+  <div class="offcanvas-body">
+    <!-- Header Section -->
+    <div class="activity-header mb-4">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <span class="badge fw-semibold" :class="statusBadgeClass(actividadSeleccionada?.avance)">
+            <span v-if="actividadSeleccionada?.avance === 0">• No iniciado</span>
+            <span v-else-if="actividadSeleccionada?.avance < 100 && actividadSeleccionada?.avance > 0">• En progreso</span>
+            <span v-else>• Completado</span>
+          </span>
+          <span class="badge ms-2 fw-semibold" :class="priorityBadgeClass(actividadSeleccionada?.prioridad)">
+            {{ actividadSeleccionada?.prioridad }}
+          </span>
+        </div>
+        <small class="text-muted">
+          <i class="bi bi-calendar me-1"></i>
+          {{ formatearFecha(actividadSeleccionada?.fecha_creacion) }}
+        </small>
+      </div>
+      <h3 class="fw-bold mt-3 text-dark">{{ actividadSeleccionada?.actividad }}</h3>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="row g-4">
+      <!-- Left Column -->
+      <div class="col-md-7">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-transparent border-0">
+            <h6 class="card-title fw-bold text-dark">
+              <i class="bi bi-info-circle me-2"></i>
+              Información General
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="mb-4">
+              <small class="text-muted fw-semibold">PROYECTO</small>
+              <p class="fs-5 fw-bold text-primary mb-0">{{ actividadSeleccionada?.proyecto || 'Sin proyecto' }}</p>
+            </div>
+            
+            <div>
+              <small class="text-muted fw-semibold">DESCRIPCIÓN</small>
+              <p class="text-dark mb-0">{{ actividadSeleccionada?.descripcion || 'Sin descripción' }}</p>
+            </div>
+
+            <div class="mt-4 pt-3 border-top">
+              <div class="row">
+                <div class="col-6">
+                  <small class="text-muted fw-semibold">FECHA CREACIÓN</small>
+                  <p class="fw-semibold text-dark mb-0">{{ formatearFecha(actividadSeleccionada?.fecha_creacion) }}</p>
+                </div>
+                <div class="col-6">
+                  <small class="text-muted fw-semibold">FECHA LÍMITE</small>
+                  <p class="fw-semibold text-dark mb-0">{{ formatearFecha(actividadSeleccionada?.fecha_limite) }}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
       </div>
-    </div>
-  </div>
 
-  <!-- Este div debe estar SIEMPRE renderizado -->
-  <div class="offcanvas offcanvas-end rounded-3 p-3 pt-0" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel" style="z-index: 1100; width: 800px; margin: 1rem;">
-    <div class="offcanvas-header border-bottom">
-      <h5 class="fw-bold">Detalles de la actividad</h5>
-      <!-- <h5 class="offcanvas-title" id="offcanvasScrollingLabel">{{ actividadSeleccionada?.actividad }}</h5> -->
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
-    </div>
-    <div class="offcanvas-body">
-      <div class="d-flex">
-        <div class="border-end border-bottom p-2" style="width: 60%; height: 50%;">
-          <small>ACTIVIDAD</small>
-          <h3 class="fw-bold">{{ actividadSeleccionada?.actividad }}</h3>
-          <small>{{ formatearFecha(actividadSeleccionada?.fecha_creacion) }}</small>
-
-          <div class="mt-4">
-            <small>PROYECTO</small>
-            <p class="fs-5 fw-bold">{{ actividadSeleccionada?.proyecto }}</p>
+      <!-- Right Column -->
+      <div class="col-md-5">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-transparent border-0">
+            <h6 class="card-title fw-bold text-dark">
+              <i class="bi bi-graph-up me-2"></i>
+              Progreso y Métricas
+            </h6>
           </div>
-
-          <div class="p-1 mt-4">
-            <h6 class="fw-bold">Descripción de la actividad</h6>
-            <p>{{ actividadSeleccionada?.descripcion }}</p>
-          </div>
-          
-        </div>
-        <div class="p-2 border-bottom" style="width: 40%;">
-          <h5 class="fw-bold">Detalles adicionales</h5>
-
-          <div class="row p-2">
-            <small class="mt-3">ESTADO</small>
-            <div class="d-flex">
-              <span 
-                 class="badge fw-semi-bold d-inline-flex align-items-center"
-                 :class="{
-                   'bg-success-subtle text-success': actividadSeleccionada?.avance === 100,
-                   'bg-warning-subtle text-warning': actividadSeleccionada?.avance > 0 && actividadSeleccionada?.avance < 100
-                 }"
-                 :style="actividadSeleccionada?.avance === 0 ? 'color: #8a0bd2; background-color: rgba(91, 6, 114, 0.2);' : ''"
-               >
-                 <span class="fw-bold" v-if="actividadSeleccionada?.avance === 0">• No iniciado</span>
-                 <span class="fw-bold" v-if="actividadSeleccionada?.avance < 100">• En progreso</span>
-                 <span class="fw-bold" v-else>• Completado</span>
-               </span>
-
-                <span 
-                  class="badge ms-3"
-                  :class="{
-                    'bg-danger-subtle': actividadSeleccionada?.prioridad === 'alta',
-                    'bg-success-subtle': actividadSeleccionada?.prioridad === 'baja',
-                    'bg-warning-subtle': actividadSeleccionada?.prioridad === 'media',
-                    'text-danger': actividadSeleccionada?.prioridad === 'alta',
-                    'text-success': actividadSeleccionada?.prioridad === 'baja',
-                    'text-warning': actividadSeleccionada?.prioridad === 'media',
-                  }"  
-                >{{ actividadSeleccionada?.prioridad }}</span>
+          <div class="card-body">
+            <div class="text-center mb-4">
+              <small class="text-muted fw-semibold">AVANCE ACTUAL</small>
+              <div class="progress mt-2" style="height: 8px;">
+                <div class="progress-bar" 
+                     :class="progressBarClass(actividadSeleccionada?.avance)"
+                     :style="`width: ${actividadSeleccionada?.avance || 0}%`">
+                </div>
+              </div>
+              <p class="fw-bold text-dark mt-2 mb-0">{{ actividadSeleccionada?.avance || 0 }}% completado</p>
             </div>
-            <small class="mt-3">FECHA LIMITE</small>
-            <div class="fw-bold">{{ formatearFecha(actividadSeleccionada?.fecha_creacion) }}</div> 
 
-            <small class="mt-3">FECHA CREACIÓN</small>
-            <div class="fw-bold">{{ formatearFecha(actividadSeleccionada?.fecha_limite) }}</div>
+            <div class="text-center">
+              <small class="text-muted fw-semibold">HORAS REGISTRADAS</small>
+              <p class="fw-bold text-primary fs-4 mb-0">{{ actividadSeleccionada?.horas_trabajadas || 0 }} hrs</p>
+            </div>
           </div>
         </div>
       </div>
-      
-      <div class="mb-3">
-        <ul class="nav nav-underline">
-          <li class="nav-item">
-            <a class="nav-link" :class="{ active: vistaActual === 'formulario' }" @click="vistaActual = 'formulario'">Actualizar</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" :class="{ active: vistaActual === 'estado' }" @click="vistaActual = 'estado'">Estado</a>
-          </li>
-        </ul>
-      </div>
-      <div v-if="vistaActual === 'formulario'">
+    </div>
 
-        <form @submit.prevent="guardarAvance">
-            <div class="inputs-row">
-              <!-- Avance Actividad -->
-              <CircularProgress 
-                :value="actividadSeleccionada.avance" 
-                :max="100" 
-                :is-hours="false"
-              >
-                <div class="input-label">Avance actividad</div>
-                <input 
-                  type="number" 
-                  v-model.number="actividadSeleccionada.avance" 
-                  min="0" 
-                  max="100" 
-                  class="circular-input"
-                  @input="actividadSeleccionada.avance = Math.min(100, Math.max(0, actividadSeleccionada.avance))"
-                />
-                <div class="input-unit">%</div>
-              </CircularProgress>
+    <!-- Navigation Tabs -->
+    <div class="mt-4">
+      <ul class="nav nav-tabs nav-underline">
+        <li class="nav-item">
+          <a class="nav-link fw-semibold" :class="{ 'active': vistaActual === 'formulario' }" 
+             @click="vistaActual = 'formulario'">
+            <i class="bi bi-pencil-square me-2"></i>
+            Actualizar Progreso
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-semibold" :class="{ 'active': vistaActual === 'estado' }" 
+             @click="vistaActual = 'estado'">
+            <i class="bi bi-clock-history me-2"></i>
+            Historial de Estado
+          </a>
+        </li>
+      </ul>
 
-              <!-- Horas Trabajadas -->
-              <CircularProgress 
-                :value="horas_trabajadas" 
-                :max="Math.max(8, horas_trabajadas)" 
-                :is-hours="true"
-              >
-                <div class="input-label">Horas trabajadas</div>
-                <input 
-                  type="number" 
-                  v-model.number="horas_trabajadas" 
-                  min="0" 
-                  class="circular-input hours-input"
-                />
-                <div class="input-unit">hrs</div>
-              </CircularProgress>
+      <!-- Tab Content -->
+      <div class="tab-content mt-3">
+        <!-- Update Form -->
+        <div v-if="vistaActual === 'formulario'" class="tab-pane fade show active">
+          <form @submit.prevent="guardarAvance" class="card border-0 shadow-sm">
+            <div class="card-body">
+              <h6 class="card-title fw-bold text-dark mb-4">
+                <i class="bi bi-arrow-up-circle me-2"></i>
+                Actualizar Progreso
+              </h6>
+              
+              <div class="row g-4">
+                <div class="col-md-6">
+                  <CircularProgress 
+                    :value="actividadSeleccionada.avance" 
+                    :max="100" 
+                    :is-hours="false"
+                  >
+                    <div class="input-label">Avance actividad</div>
+                    <input 
+                      type="number" 
+                      v-model.number="actividadSeleccionada.avance" 
+                      min="0" 
+                      max="100" 
+                      class="circular-input"
+                      @input="actividadSeleccionada.avance = Math.min(100, Math.max(0, actividadSeleccionada.avance))"
+                    />
+                    <div class="input-unit">%</div>
+                  </CircularProgress>
+                </div>
+
+                <div class="col-md-6">
+                  <CircularProgress 
+                    :value="horas_trabajadas" 
+                    :max="Math.max(8, horas_trabajadas)" 
+                    :is-hours="true"
+                  >
+                    <div class="input-label">Horas trabajadas</div>
+                    <input 
+                      type="number" 
+                      v-model.number="horas_trabajadas" 
+                      min="0" 
+                      class="circular-input hours-input"
+                    />
+                    <div class="input-unit">hrs</div>
+                  </CircularProgress>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end mt-4">
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-floppy me-2"></i>
+                  Guardar Cambios
+                </button>
+              </div>
             </div>
+          </form>
+        </div>
 
-          <!-- Botón -->
-          <div class="d-flex justify-content-end mt-4">
-            <button 
-              type="submit" 
-              class="rounded-4 btn btn-outline-primary guardar-expandible d-flex align-items-center"
-            >
-              <i class="bi bi-floppy fs-6"></i>
-              <span class="guardar-text">Guardar</span>
-            </button>
-          </div>        
-        </form>
+        <!-- Status History -->
+        <div v-if="vistaActual === 'estado'" class="tab-pane fade show active">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <h6 class="card-title fw-bold text-dark mb-4">
+                <i class="bi bi-list-check me-2"></i>
+                Historial de Actualizaciones
+              </h6>
+              
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th scope="col" class="fw-semibold">Actividad</th>
+                      <th scope="col" class="fw-semibold">Avance</th>
+                      <th scope="col" class="fw-semibold">Horas</th>
+                      <th scope="col" class="fw-semibold">Actualización</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(registro, index) in actualizacion" :key="index">
+                      <td>{{ registro.actividad }}</td>
+                      <td>
+                        <span class="badge bg-primary-subtle text-primary">
+                          {{ registro.avance }}%
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge bg-info-subtle text-info">
+                          {{ registro.horas_trabajadas }} hrs
+                        </span>
+                      </td>
+                      <td>
+                        <small class="text-muted">{{ fechaUpdate(registro.fecha_actualizacion) }}</small>
+                      </td>
+                    </tr>
+                    <tr v-if="actualizacion.length === 0">
+                      <td colspan="4" class="text-center py-4">
+                        <i class="bi bi-inbox display-6 text-muted"></i>
+                        <p class="text-muted mt-2">No hay registros de actualización</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-      <div v-if="vistaActual === 'estado'">
-        <table class="table">
-          <thead class="table-light">
-            <tr>
-              <th scope="col" class="fw-bold">Actividad</th>
-              <th scope="col" class="fw-bold">Avance</th>
-              <th scope="col" class="fw-bold">Horas</th>
-              <th scope="col" class="fw-bold">Actualización</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(registro, index) in actualizacion" :key="index">
-              <td>{{ registro.actividad }}</td>
-              <td>{{ registro.avance }}%</td>
-              <td>{{ registro.horas_trabajadas }} hrs</td>
-              <td>{{ fechaUpdate(registro.fecha_actualizacion) }}</td>
-            </tr>
-            <tr v-if="actualizacion.length === 0">
-              <td colspan="4" class="text-center">No hay registro</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
   </div>
+</div>
 
   <!-- Modal de confirmación para horas extra -->
   <div 
@@ -351,7 +450,6 @@
     </div>
   </div>
 
-
   <ActividadModal
     :show="showModal"
     @close="showModal = false"
@@ -362,7 +460,6 @@
     :initialData="selectedActivity"
     @close="cModal = false"
   />
-
 </template>
 
 <script>
@@ -373,10 +470,13 @@ import * as bootstrap from 'bootstrap'
 import ActividadModal from '@/components/ActividadModal.vue'
 import { useToast } from 'vue-toastification'
 import CustomToast from './CustomToast.vue'
-import { h } from 'vue'
+import { h, toHandlers } from 'vue'
 import CompletadoModal from '@/components/CompletadoModal.vue'
 import CircularProgress from '@/components/CircularProgress.vue'
+import { Dropdown } from 'bootstrap'
+import isBetween from 'dayjs/plugin/isBetween'
 
+dayjs.extend(isBetween)
 dayjs.locale('es')
 
 const user = JSON.parse(localStorage.getItem('user'))
@@ -392,6 +492,7 @@ export default {
   },
   data() {
     return {
+      mostrarFiltro: false,
       internalValue: this.value,
       currentView: 'board',
       activeDropdown: null,
@@ -414,10 +515,29 @@ export default {
       intervaloHoras: null,
       actividadSeleccionada : {
         avance: 0
+      },
+      dropdownInstances: [],
+      selectedYear: new Date().getFullYear(),
+      rango: {
+        start: dayjs().startOf('month').toDate(),
+        end: dayjs().endOf('month').toDate()
       }
     }
   },
+  computed: {
+    years() {
+      const currentYear = new Date().getFullYear()
+      const range = []
+      for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+        range.push(i)
+      }
+      return range
+    }
+  },
   methods: {
+    toggleFilter() {
+      this.mostrarFiltro = !this.mostrarFiltro
+    },
     viewDetails(actividad) {
       this.selectedActivity = actividad
     },
@@ -454,12 +574,30 @@ export default {
       const user = JSON.parse(localStorage.getItem('user'))
       try {
         const res = await axios.get(`http://localhost:4001/api/actividades/${user.id}`)
+        
+        const hoy = dayjs()
+        const inicioSemana = hoy.startOf('week')
+        const finSemana = hoy.endOf('week')
+        
         this.asignaciones = res.data.asignaciones
         this.enProgreso = res.data.enProgreso
-        this.completadas = res.data.completadas
+
+        this.completadas = res.data.completadas.filter(act => 
+          dayjs(act.fecha_limite).isBetween(inicioSemana, finSemana, 'day', '[]')
+        )
       } catch (err) {
         console.error('Error al cargar actividades:', err)
       }
+    },
+    filtrarPorFechas() {
+      if (!this.rango || !this.rango.start || !this.rango.end) return
+
+      const inicio = dayjs(this.rango.start).startOf('day')
+      const fin = dayjs(this.rango.end).endOf('day')
+
+      this.completadas = this.completadas.filter(act => 
+        dayjs(act.fecha_limite).isBetween(inicio, fin, 'day', '[]')
+      )
     },
     async guardarAvance() {
       const actividad = this.actividadSeleccionada
@@ -563,28 +701,16 @@ export default {
       const fechaUp = dayjs(fecha).format('MMMM DD, YYYY')
       return fechaUp.charAt(0).toUpperCase() + fechaUp.slice(1)
     },
-    badgeBgClass(prioridad) {
+    badgePriorityClass(prioridad) {
       switch (prioridad?.toLowerCase()) {
         case 'alta':
-          return 'bg-danger-subtle'
+          return 'bg-danger-subtle text-danger'
         case 'media':
-          return 'bg-warning-subtle'
+          return 'bg-warning-subtle text-warning'
         case 'baja':
-          return 'bg-success-subtle'
+          return 'bg-success-subtle text-success'
         default:
-          return 'bg-secondary'
-      }
-    },
-    badgeTextClass(prioridad) {
-      switch (prioridad?.toLowerCase()) {
-        case 'alta':
-          return 'text-danger'
-        case 'media':
-          return 'text-warning'
-        case 'baja':
-          return 'text-success'
-        default:
-          return 'text-dark'
+          return 'bg-secondary text-white'
       }
     },
     abrirOffcanvas(actividad) {
@@ -599,7 +725,7 @@ export default {
           console.error('Offcanvas no encontrado en el DOM.')
         }
 
-            // Cargar actualizaciones después de que la actividad fue asignada
+        // Cargar actualizaciones después de que la actividad fue asignada
         if (this.actividadSeleccionada?.id_activities) {
           this.loadUpdates()
         } else {
@@ -620,6 +746,24 @@ export default {
       console.log('Datos completos:', this.selectedActivity)
       this.cModal = true
     },
+    statusBadgeClass(avance) {
+      if (avance === 100) return 'bg-success-subtle text-success'
+      if (avance > 0 && avance < 100) return 'bg-warning-subtle text-warning'
+      return 'bg-secondary-subtle text-secondary'
+    },
+    priorityBadgeClass(prioridad) {
+      switch (prioridad?.toLowerCase()) {
+        case 'alta': return 'bg-danger-subtle text-danger'
+        case 'media': return 'bg-warning-subtle text-warning'
+        case 'baja': return 'bg-success-subtle text-success'
+        default: return 'bg-secondary-subtle text-secondary'
+      }
+    },
+    progressBarClass(avance) {
+      if (avance === 100) return 'bg-success'
+      if (avance > 0 && avance < 100) return 'bg-warning'
+      return 'bg-secondary'
+    }
   },
 
   mounted() {
@@ -631,6 +775,12 @@ export default {
       this.modalInstance = new bootstrap.Modal(modalEl)
     }
 
+    this.$nextTick(() => {
+      if (this.$refs.dropdownBtn) {
+        this.dropdownInstance = Dropdown.getOrCreateInstance(this.$refs.dropdownBtn)
+      }
+    })
+
     this.cargarHorasHoy()
     this.intervaloHoras = setInterval(() => {
       this.cargarHorasHoy()
@@ -639,123 +789,344 @@ export default {
 
   beforeUnmount() {
     document.removeEventListener('click', this.handleClickOutside)
+    
+    if (this.dropdownInstance) {
+      this.dropdownInstance.dispose()
+    }
 
     clearInterval(this.intervaloHoras)
   },
   created(){
     this.cargarActividades()
   },
-
+  watch: {
+    rango: {
+      deep: true,
+      handler(val) {
+        if (Array.isArray(val)) {
+          if (val[0] && !(val[0] instanceof Date)) {
+            this.rango[0] = dayjs(val[0]).toDate()
+          }
+          if (val[1] && !(val[1] instanceof Date)) {
+            this.rango[1] = dayjs(val[1]).toDate()
+          }
+        }
+      }
+    }
+  }
 }
 </script>
 
-
-
 <style scoped>
+/* Variables CSS */
+:root {
+    --primary-color: #3b82f6;
+    --primary-light: #dbeafe;
+    --success-color: #10b981;
+    --success-light: #d1fae5;
+    --warning-color: #f59e0b;
+    --warning-light: #fef3c7;
+    --info-color: #06b6d4;
+    --info-light: #cffafe;
+    --danger-color: #ef4444;
+    --danger-light: #fee2e2;
+    --secondary-color: #6b7280;
+    --light-bg: #f8fafc;
+    --border-color: #e5e7eb;
+    --border-radius: 12px;
+    --border-radius-sm: 8px;
+    --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 2px 4px 6px 2px rgba(0, 0, 0, 0.05);
+    --transition: all 0.3s ease;
+}
+
+/* Content View */
+.content-view {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+/* Header Section */
+.header-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--box-shadow);
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 2rem;
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+    color: var(--secondary-color);
+}
+
+/* Kanban Board */
+.kanban-column {
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.kanban-column:hover {
+    box-shadow: var(--box-shadow-lg);
+}
+
+.kanban-column-body {
+    overflow-y: auto;
+    max-height: 600px;
+    padding: 1rem;
+}
+
+.kanban-card {
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.kanban-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow-lg);
+}
+
+/* Agrega estos estilos al section de estilo */
+
+/* Mejora de visibilidad para las tarjetas de actividades */
+.kanban-card .card-body {
+    background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.kanban-card:hover .card-body {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Bordes de color según el estado */
+.kanban-card[data-status="not-started"] .card-body {
+    border-left-color: #8a0bd2;
+    background: linear-gradient(135deg, #ffffff 0%, #f9f5ff 100%);
+}
+
+.kanban-card[data-status="in-progress"] .card-body {
+    border-left-color: #f59e0b;
+    background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+}
+
+.kanban-card[data-status="completed"] .card-body {
+    border-left-color: #10b981;
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+/* Mejora de contraste para el texto */
 .card-title {
-  font-size: 1.25rem;
+    color: #1f2937 !important;
+    font-weight: 600;
 }
 
-.card-body {
-  padding: 1.25rem;
+.card-text {
+    color: #4b5563 !important;
+    line-height: 1.4;
 }
 
+/* Mejora de los badges de estado */
+.status-badge {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-not-started {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white !important;
+}
+
+.status-in-progress {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white !important;
+}
+
+.status-completed {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white !important;
+}
+
+/* Mejora de los iconos */
+.text-muted i {
+    color: #6b7280 !important;
+}
+
+/* Sombra más suave para las tarjetas */
+.kanban-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f3f4f6;
+}
+
+.kanban-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+}
+
+/* Mejora de contraste para la información de fechas y horas */
+.kanban-card small {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.kanban-card small i {
+    color: #4b5563;
+}
+
+/* Efecto de elevación al hacer hover */
+.kanban-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Status Badges */
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 20px;
+}
+
+.status-not-started {
+    color: #8a0bd2;
+    background-color: rgba(91, 6, 114, 0.2);
+}
+
+.status-in-progress {
+    background-color: var(--warning-light);
+    color: var(--warning-color);
+}
+
+.status-completed {
+    background-color: var(--success-light);
+    color: var(--success-color);
+}
+
+/* Badge Styles */
 .badge {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
 }
 
-.table-responsive {
-  overflow-x: auto;
+.bg-primary-subtle { background-color: var(--primary-light) !important; }
+.bg-success-subtle { background-color: var(--success-light) !important; }
+.bg-warning-subtle { background-color: var(--warning-light) !important; }
+.bg-danger-subtle { background-color: var(--danger-light) !important; }
+
+/* Empty States */
+.empty-kanban-state {
+    color: var(--secondary-color);
 }
 
-
-.list-group-item {
-  border: 1px solid #dee2e6;
-  margin-bottom: 0.5rem;
-  padding: 1rem;
-}
-
-@media (max-width: 768px) {
-  .row-cols-md-3 {
-    flex-direction: column;
-  }
-  .card {
-    max-width: 100% !important;
-  }
-  .list-group-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-.progress-indicator {
-  max-width: 300px;
-  margin: auto;
-}
-.gauge {
-  width: 100%;
-  height: auto;
-}
-.center-input {
-  width: 100%;
-  height: 100%;
-  font-size: 10px;
-  font-weight: bold;
-  text-align: center;
-  border: none;
-  background: transparent;
-  color: white;
-}
-.label {
-  font-size: 4px;
-  fill: #ccc;
-}
-
-/* .descripcion-recortada {
-  max-height: 4rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2; 
-  -webkit-box-orient: vertical;
-} */
-
+/* Descripción recortada */
 .descripcion-recortada {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-
-
-.guardar-expandible {
-  width: 2.5rem; /* Ancho compacto inicial */
-  overflow: hidden;
-  transition: width 0.3s ease;
-  white-space: nowrap;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.nav-link {
-  cursor: pointer;
+.header-section,
+.kanban-column {
+    animation: fadeInUp 0.6s ease forwards;
 }
 
-.guardar-expandible .guardar-text {
-  opacity: 0;
-  transition: opacity 0.2s ease 0.1s;
+.kanban-column:nth-child(1) { animation-delay: 0.1s; }
+.kanban-column:nth-child(2) { animation-delay: 0.2s; }
+.kanban-column:nth-child(3) { animation-delay: 0.3s; }
+
+.kanban-card {
+    animation: fadeInUp 0.4s ease forwards;
 }
 
-/* Al hacer hover, el botón se expande */
-.guardar-expandible:hover {
-  width: 8rem; /* Ajusta según el largo del texto */
+.kanban-card:nth-child(odd) { animation-delay: 0.1s; }
+.kanban-card:nth-child(even) { animation-delay: 0.15s; }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .content-view {
+        padding: 1rem;
+    }
+    
+    .header-section {
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+    }
+    
+    .kanban-column {
+        margin-bottom: 1.5rem;
+    }
+    
+    .kanban-column-body {
+        max-height: 400px;
+    }
 }
 
-.guardar-expandible:hover .guardar-text {
-  opacity: 1;
+@media (max-width: 576px) {
+    .kanban-card:hover {
+        transform: none;
+    }
 }
 
+/* Offcanvas Styles */
+/* Offcanvas improvements */
+.offcanvas {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.offcanvas .card {
+    background: white;
+    border: 1px solid #e5e7eb;
+}
+
+.offcanvas .card-header {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Mejora de contraste en el offcanvas */
+.offcanvas .text-dark {
+    color: #1f2937 !important;
+}
+
+.offcanvas .text-muted {
+    color: #6b7280 !important;
+}
+
+.offcanvas .progress-bar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Styles */
 .circular-input {
     width: 80px;
     text-align: center;
@@ -786,15 +1157,6 @@ export default {
     margin-top: 5px;
 }
 
-.form-container {
-    max-width: 600px;
-    margin: 0 auto;
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-}
-
 .inputs-row {
     display: flex;
     justify-content: space-around;
@@ -803,10 +1165,29 @@ export default {
     flex-wrap: wrap;
 }
 
-@media (max-width: 768px) {
-    .inputs-row {
-        flex-direction: column;
-        gap: 30px;
-    }
+.guardar-expandible {
+    width: 2.5rem;
+    overflow: hidden;
+    transition: width 0.3s ease;
+    white-space: nowrap;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+.guardar-expandible .guardar-text {
+    opacity: 0;
+    transition: opacity 0.2s ease 0.1s;
+}
+
+.guardar-expandible:hover {
+    width: 8rem;
+}
+
+.guardar-expandible:hover .guardar-text {
+    opacity: 1;
+}
+
+.nav-link {
+    cursor: pointer;
 }
 </style>
