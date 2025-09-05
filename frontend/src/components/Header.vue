@@ -51,24 +51,6 @@ onBeforeUnmount(() => {
       </button>
     </div>
 
-    <!-- Centro: Barra de búsqueda -->
-    <div class="d-flex align-items-center flex-grow-1 mx-5">
-      <div class="w-100">
-        <div class="input-group position-relative">
-          <i class="bi bi-search text-muted search-icon"></i>
-          <input
-            type="search"
-            class="form-control rounded-pill"
-            placeholder="Search project"
-            aria-label="Search project"
-            style="
-              padding-left: 2.75rem; 
-              color: rgb(105 28 32);"
-          >
-        </div>
-      </div>
-    </div>
-
     <!-- Derecha: Íconos de notificación y usuario -->
     <div class="d-flex align-items-center gap-3">
       
@@ -205,206 +187,169 @@ onBeforeUnmount(() => {
     <!-- Panel de notificaciones -->
     <div 
       v-if="mostrarNotificaciones"
-      class="card position-absolute top-100 end-0 mt-2  shadow-lg rounded-4"
-      style="width: 400px; z-index: 1000; margin: 1rem; border-color: rgb(105, 28, 32);">
-      <div class="card-header d-flex justify-content-between rounded-4" style="background: rgb(105, 28, 32);">
-        <div class="fw-bold d-flex align-items-center text-white">
+      class="notifications-panel position-absolute top-100 end-0 mt-2 shadow-lg"
+    >
+      <div class="notifications-header">
+        <div class="notifications-title text-black">
+          <i class="bi bi-bell me-2"></i>
           Notificaciones
         </div>
-        <div>
-          <ul
-            class="nav nav-pills gobTertiary rounded-5 small"
-            id="pills-tab"
-            role="tablist"
-            style=" height: 40px; padding-left: 5px; padding-right: 5px;"
-          >
-            <li class="nav-item d-flex align-items-center container-tooltip" role="presentation" style="height: 40px;">
-              <button
-                class="nav-link rounded-5 py-1 px-2 small"
-                id="pills-home-tab"
-                data-bs-toggle="pill"
-                active-class="gobPrimary"
-                data-bs-target="#pills-home"
-                type="button"
-                role="tab"
-                aria-controls="pills-home"
-                aria-selected="true"
-                style="font-size: 0.85rem;"
-                :class="{ active: pestañaActiva === 'no-leidas' }"
-                @click="pestañaActiva = 'no-leidas'"
-              >
-                <i class="bi bi-envelope"></i>
-              </button>
-               <span class="tooltip-custom">No leídos</span>
+        <div class="notifications-tabs">
+          <ul class="nav nav-underline border-bottom" id="pills-tab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link" :class="{ active: pestañaActiva === 'no-leidas' }" @click="pestañaActiva = 'no-leidas'">
+                <small class="text-body-tertiary">
+                  <i class="bi bi-envelope"></i>
+                  No leidos
+                </small>
+              </a>
             </li>
-
-            <li class="nav-item d-flex align-items-center container-tooltip" role="presentation" style="height: 40px;">
-              <button
-                class="nav-link rounded-5 py-1 px-2 small"
-                id="pills-profile-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#pills-profile"
-                type="button"
-                role="tab"
-                aria-controls="pills-profile"
-                aria-selected="false"
-                style="font-size: 0.85rem;"
-                :class="pestañaActiva === 'leidas'"
-                @click="pestañaActiva = 'leidas'"
-              >
-                <i class="bi bi-envelope-open"></i>
-              </button>
-              <span class="tooltip-custom">Leídos</span>
+            <li class="nav-item">
+              <a class="nav-link" :class="{ active: pestañaActiva === 'leidas' }" @click="pestañaActiva = 'leidas'">
+                <small class="text-body-tertiary">
+                  <i class="bi bi-envelope-open"></i>
+                  Leidas
+                </small>
+              </a>
             </li>
-            
-            <li class="nav-item d-flex align-items-center container-tooltip" role="presentation" style="height: 40px;">
-              <button
-                class="nav-link rounded-5 py-1 px-2 small"
-                id="pills-profile-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#pills-profile"
-                type="button"
-                role="tab"
-                aria-controls="pills-profile"
-                aria-selected="false"
-                style="font-size: 0.85rem;"
-                :class="pestañaActiva === 'pospuestas'"
-                @click="pestañaActiva = 'pospuestas'"
-              >
-                <i class="bi bi-clock"></i>
-              </button>
-              <span class="tooltip-custom">Pospuestos</span>
+            <li class="nav-item">
+              <a class="nav-link" :class="{ active: pestañaActiva === 'pospuestas' }" @click="pestañaActiva = 'pospuestas'">
+                <small class=" text-body-tertiary">
+                  <i class="bi bi-clock"></i>
+                  Pospuestos
+                </small>
+              </a>
             </li>
           </ul>
+
         </div>
       </div>
 
-      <div>   
-        <div v-if="pestañaActiva === 'no-leidas' && notificacionesNoLeidas.length === 0" class="text-center row g-0">
-          <i class="fs-1 bi bi-bell-slash"></i>
-          <small class="fs-5 text-muted fw-semibold">Sin notificaciones</small>
+      <div class="notifications-content">   
+        <!-- Estado vacío para no leídas -->
+        <div v-if="pestañaActiva === 'no-leidas' && notificacionesNoLeidas.length === 0" class="empty-state">
+          <i class="bi bi-bell-slash empty-icon"></i>
+          <p class="empty-text">Sin notificaciones</p>
         </div>
 
-        <div v-if="pestañaActiva === 'leidas' && notificacionesLeidas.length === 0" class="text-center row g-0">
-          <i class="fs-1 bi bi-bell-slash"></i>
-          <small class="fs-5 text-muted fw-semibold">Sin notificaciones leídas</small>
+        <!-- Estado vacío para leídas -->
+        <div v-if="pestañaActiva === 'leidas' && notificacionesLeidas.length === 0" class="empty-state">
+          <i class="bi bi-bell-slash empty-icon"></i>
+          <p class="empty-text">Sin notificaciones leídas</p>
         </div>
 
-        <div v-if="pestañaActiva === 'pospuestas' && notificacionesPospuestas.length === 0" class="text-center row g-0">
-          <i class="fs-1 bi bi-bell-slash"></i>
-          <small class="fs-5 text-muted fw-semibold">Sin notificaciones pospuestas</small>
+        <!-- Estado vacío para pospuestas -->
+        <div v-if="pestañaActiva === 'pospuestas' && notificacionesPospuestas.length === 0" class="empty-state">
+          <i class="bi bi-bell-slash empty-icon"></i>
+          <p class="empty-text">Sin notificaciones pospuestas</p>
         </div>
 
         <!-- NO LEÍDAS -->
         <div v-if="pestañaActiva === 'no-leidas'">
-
           <div 
-            class="d-flex align-items-start gap-3 p-2 pb-0 border-bottom notificacion-hover rounded-bottom-4"
+            class="notification-item"
             v-for="notificacion in notificacionesNoLeidas"
-            :key="notificacion.id_push"  
+            :key="notificacion.id_push"
           >
             <!-- Ícono -->
             <div 
-                class="rounded-circle d-flex justify-content-center align-items-center flex-shrink-0"
-                style="width: 50px; height: 50px; margin-bottom: 5px;"
-                :class="[
-                  notificacion.tipo === 'vencimiento'
-                    ? 'bg-warning-subtle text-warning'
-                    : notificacion.tipo === 'ajuste'
-                    ? 'bg-info-subtle text-info'
-                    : badgeBgClass(notificacion.prioridad)
-                ]"
+              class="notification-icon"
+              :class="[
+                notificacion.tipo === 'vencimiento'
+                  ? 'bg-warning-subtle text-warning'
+                  : notificacion.tipo === 'ajuste'
+                  ? 'bg-info-subtle text-info'
+                  : badgeBgClass(notificacion.prioridad)
+              ]"
             >
               <i 
-                class="bi fs-4"
+                class="bi"
                 :class="[
                   notificacion.tipo === 'vencimiento'
                     ? 'bi-hourglass-split'
                     : notificacion.tipo === 'ajuste'
                     ? 'bi-pencil-square'
-                    : badgeIcon(notificacion.prioridad)]"  >
+                    : badgeIcon(notificacion.prioridad)]"
+              >
               </i>
             </div>
 
             <!-- Contenido de la notificación -->
-            <div class="flex-grow-1 notificacion-hover">
-              <div class="d-flex flex-column">
-                <small>
-                  <span class="fw-bold">{{ notificacion.nombre_creador }} {{ notificacion.paterno_creador }}</span> 
-                  {{ notificacion.mensaje }}
-                  <span class="fw-bold text-dark">{{ notificacion.actividad }}</span>
-                </small>
-
-                <small class="text-muted d-flex justify-content-between pb-1">
-                  <small>{{ notificacion.tiempo }}</small>
-
-                  <small class="iconos-vencimiento" v-if="notificacion.tipo === 'asignacion' && notificacion.respuesta === 'pendiente'">
-                    <div class="tooltip-container">
-                      <button class="btn btn-success rounded-circle" @click="responderNotificacion(notificacion.id_push, 'aceptada')">
-                          <i class="bi bi-check-circle"></i>
-                      </button>
-                      <span class="custom-tooltip">Aceptar</span>
-                    </div>
-
-                    <div class="tooltip-container">
-                      <button class="btn btn-danger rounded-circle" @click="responderNotificacion(notificacion.id_push, 'rechazada')">
-                        <i class="bi bi-x-circle"></i>
-                      </button>
-                      <span class="custom-tooltip">Rechazar</span>    
-                    </div>
-                  </small>
-                  <!-- Inconos para vencimiento -->
-                  <small class="pt-0 pe-2 iconos-vencimiento" v-if="notificacion.tipo === 'vencimiento'">
-                    <div class="tooltip-container">
-                      <button class="btn btn-dark rounded-5" @click="marcarComoLeida(notificacion.id_push)">
-                        <i class="bi bi-envelope-open"></i>
-                      </button>
-                      <span class="custom-tooltip">Marcar como leída</span>
-                    </div>
-
-                    <div class="tooltip-container">
-                      <button class="btn btn-dark rounded-5" @click="toggleDropdown">
-                        <i class="bi bi-clock"></i>
-                      </button>
-                      <ul v-show="mostrarOpciones" class="custom-dropdown">
-                        <li class="pe-5" disabled>Posponer hasta...</li>
-                        <li class="d-flex justify-content-between" @click="posponerNotificacion(30, notificacion.id_push)">
-                          <span>Hoy más tarde</span> 
-                          <span class="ps-3">30 mim</span>
-                        </li>
-                        <li class="d-flex justify-content-between" @click="posponerNotificacion(60, notificacion.id_push)">
-                          <span>...</span>
-                          <span>1 hora</span>
-                        </li>
-                        <li class="d-flex justify-content-between border-bottom" @click="posponerNotificacion(120, notificacion.id_push)">
-                          <span>...</span>
-                          <span>2 horas</span>
-                        </li>
-                        <li @click="posponerActividad(notificacion.id_push)">
-                          <span><i class="bi bi-calendar-event"></i></span>
-                          <span class="ps-2"><i>Elegir fecha y hora</i></span>
-                        </li>
-                      </ul>
-                      <span class="custom-tooltip">Posponer</span>
-                    </div>
-                  </small>
-                </small>
+            <div class="notification-content">
+              <div class="notification-message">
+                <span class="sender-name">{{ notificacion.nombre_creador }} {{ notificacion.paterno_creador }}</span> 
+                {{ notificacion.mensaje }}
+                <span class="activity-name">{{ notificacion.actividad }}</span>
               </div>
+
+              <div class="notification-footer">
+                <span class="notification-time">{{ notificacion.tiempo }}</span>
+
+                <div class="notification-actions" v-if="notificacion.tipo === 'asignacion' && notificacion.respuesta === 'pendiente'">
+                  <div class="tooltip-container">
+                    <button class="action-btn-small success rounded-3" @click="responderNotificacion(notificacion.id_push, 'aceptada')">
+                      <i class="bi bi-check-circle"></i>
+                    </button>
+                    <span class="custom-tooltip">Aceptar</span>
+                  </div>
+                  <div class="tooltip-container">
+                    <button class="action-btn-small danger rounded-3" @click="responderNotificacion(notificacion.id_push, 'rechazada')">
+                      <i class="bi bi-x-circle"></i>
+                    </button>
+                    <span class="custom-tooltip">Rechazar</span>
+                  </div>
+
+                </div>
+
+                <!-- Acciones para vencimiento -->
+                <div class="notification-actions" v-if="notificacion.tipo === 'vencimiento'">
+                  <div class="tooltip-container">
+                    <button class="action-btn-small primary rounded-3" @click="marcarComoLeida(notificacion.id_push)">
+                      <i class="bi bi-envelope-open"></i>
+                    </button>
+                    <span class="custom-tooltip">Marcar como leída</span>
+                  </div>
+
+                  <div class="tooltip-container">
+                    <button class="action-btn-small secondary rounded-3" @click="toggleDropdown">
+                      <i class="bi bi-clock"></i>
+                    </button>
+                    <ul v-show="mostrarOpciones" class="custom-dropdown">
+                      <li class="pe-5" disabled>Posponer hasta...</li>
+                      <li class="d-flex justify-content-between" @click="posponerNotificacion(30, notificacion.id_push)">
+                        <span>Hoy más tarde</span> 
+                        <span class="ps-3">30 mim</span>
+                      </li>
+                      <li class="d-flex justify-content-between" @click="posponerNotificacion(60, notificacion.id_push)">
+                        <span>...</span>
+                        <span>1 hora</span>
+                      </li>
+                      <li class="d-flex justify-content-between border-bottom" @click="posponerNotificacion(120, notificacion.id_push)">
+                        <span>...</span>
+                        <span>2 horas</span>
+                      </li>
+                      <li @click="posponerActividad(notificacion.id_push)">
+                        <span><i class="bi bi-calendar-event"></i></span>
+                        <span class="ps-2"><i>Elegir fecha y hora</i></span>
+                      </li>
+                    </ul>
+                    <span class="custom-tooltip">Posponer</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
         </div>
 
         <!-- LEÍDAS -->
         <div v-if="pestañaActiva === 'leidas'">
-         <div 
-            class="d-flex align-items-start gap-3 p-2 pb-0 border-bottom"
+          <div 
+            class="notification-item read"
             v-for="notificacion in notificacionesLeidas"
             :key="notificacion.id_push"  
           >
-            <!-- Ícono -->
             <div 
-              class="rounded-circle d-flex justify-content-center align-items-center flex-shrink-0"
-              style="width: 50px; height: 50px; padding: .8rem; margin-bottom: 5px;"
+              class="notification-icon"
               :class="[
                 notificacion.tipo == 'vencimiento'
                   ? 'bg-warning-subtle text-warning'
@@ -412,30 +357,28 @@ onBeforeUnmount(() => {
                   ? 'bg-info-subtle text-info'
                   : badgeBgClass(notificacion.prioridad)
               ]"
-              >
+            >
               <i 
-                class="bi fs-4"
+                class="bi"
                 :class="[
                   notificacion.tipo ==='vencimiento'
                     ? 'bi-hourglass-split'
                     : notificacion.tipo === 'ajuste'
                     ? 'bi-pencil-square'
                     : badgeIcon(notificacion.prioridad)
-                ]"  >
+                ]"
+              >
               </i>
             </div>
 
-            <!-- Contenido de la notificación -->
-            <div class="flex-grow-1">
-              <div class="d-flex flex-column">
-                <small>
-                  <span>{{ notificacion.nombre_creador }} {{ notificacion.paterno_creador }}</span>
-                  {{ notificacion.mensaje }}
-                  <span class="text-dark">{{ notificacion.actividad }}</span>
-                </small>
-                <small class="text-muted d-flex justify-content-between">
-                  <small>{{ notificacion.tiempo }}</small>
-                </small>
+            <div class="notification-content">
+              <div class="notification-message">
+                <span class="sender-name">{{ notificacion.nombre_creador }} {{ notificacion.paterno_creador }}</span>
+                {{ notificacion.mensaje }}
+                <span class="activity-name">{{ notificacion.actividad }}</span>
+              </div>
+              <div class="notification-footer">
+                <span class="notification-time">{{ notificacion.tiempo }}</span>
               </div>
             </div>
           </div>
@@ -443,15 +386,13 @@ onBeforeUnmount(() => {
 
         <!-- POSPUESTAS -->
         <div v-if="pestañaActiva === 'pospuestas'">
-         <div 
-            class="d-flex align-items-start gap-3 p-2 pb-0 border-bottom"
+          <div 
+            class="notification-item postponed"
             v-for="notificacion in notificacionesPospuestas"
             :key="notificacion.id_push"  
           >
-            <!-- Ícono -->
             <div 
-              class="rounded-circle d-flex justify-content-center align-items-center flex-shrink-0"
-              style="width: 50px; height: 50px; padding: .8rem; margin-bottom: 5px;"
+              class="notification-icon"
               :class="[
                 notificacion.tipo == 'vencimiento'
                   ? 'bg-warning-subtle text-warning'
@@ -459,30 +400,28 @@ onBeforeUnmount(() => {
                   ? 'bg-info-subtle text-info'
                   : badgeBgClass(notificacion.prioridad)
               ]"
-              >
+            >
               <i 
-                class="bi fs-4"
+                class="bi"
                 :class="[
                   notificacion.tipo ==='vencimiento'
                     ? 'bi-hourglass-split'
                     : notificacion.tipo === 'ajuste'
                     ? 'bi-pencil-square'
                     : badgeIcon(notificacion.prioridad)
-                ]"  >
+                ]"
+              >
               </i>
             </div>
 
-            <!-- Contenido de la notificación -->
-            <div class="flex-grow-1">
-              <div class="d-flex flex-column">
-                <small>
-                  <span>{{ notificacion.nombre_creador }} {{ notificacion.paterno_creador }}</span>
-                  {{ notificacion.mensaje }}
-                  <span class="text-dark">{{ notificacion.actividad }}</span>
-                </small>
-                <small class="text-muted d-flex justify-content-between">
-                  <small>{{ notificacion.tiempo }}</small>
-                </small>
+            <div class="notification-content">
+              <div class="notification-message">
+                <span class="sender-name">{{ notificacion.nombre_creador }} {{ notificacion.paterno_creador }}</span>
+                {{ notificacion.mensaje }}
+                <span class="activity-name">{{ notificacion.actividad }}</span>
+              </div>
+              <div class="notification-footer">
+                <span class="notification-time">{{ notificacion.tiempo }}</span>
               </div>
             </div>
           </div>
@@ -666,13 +605,6 @@ export default {
 
 
 <style scoped>
-.nav-link  {
-  color: #691c20
-}
-.nav-link.active {
-  background-color: #691c20;
-}
-
 .input-group {
   max-width: 100%;
 }
@@ -780,8 +712,6 @@ export default {
   opacity: 1;
 }
 
-
-
 /* Tooltips del panel de notificaciones */
 .tooltip-container {
   position: relative;
@@ -789,7 +719,7 @@ export default {
 }
 
 .custom-tooltip {
-  visibility: hidden;
+  visibility: visible;
   background-color: #000;
   color: #fff;
   text-align: center;
@@ -807,7 +737,7 @@ export default {
   opacity: 0;
   transition: opacity 0.3s;
   white-space: nowrap;
-  z-index: 100;
+  z-index: 2100;
 }
 
 .tooltip-container:hover .custom-tooltip {
@@ -877,6 +807,391 @@ export default {
 .custom-dropdown li:hover {
   background-color: #f1f1f1;
 }
+
+.nav-link:hover {
+  background-color: transparent;
+  cursor: pointer;
+  color: black;
+}
+
+/* Panel de notificaciones */
+.notifications-panel {
+  width: 400px;
+  max-height: 600px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--primary-color);
+  background: white;
+  overflow: hidden;
+  z-index: 1000;
+  margin-right: 1rem;
+}
+
+.notifications-header {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #8b2635 100%);
+  color: white;
+  padding: 1rem;
+  align-items: center;
+  /* border: solid 0.5px black; */
+  padding-bottom: 0;
+}
+
+.notifications-title {
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.notifications-tabs .nav-pills {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 25px;
+  padding: 0.25rem;
+  gap: 0.25rem;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  transition: var(--transition);
+}
+
+.tab-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.tab-btn.active {
+  background-color: white;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+/* Contenido de notificaciones */
+.notifications-content {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: var(--secondary-color);
+  margin-bottom: 1rem;
+}
+
+.empty-text {
+  color: var(--secondary-color);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Items de notificación */
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 5px 1rem 5px 1rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: var(--transition);
+  position: relative;
+}
+
+.notification-item:hover {
+  background-color: #ebeded;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item.read {
+  opacity: 0.7;
+}
+
+.notification-item.postponed {
+  border-left: 4px solid var(--warning-color);
+}
+
+.notification-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-message {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.sender-name {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.activity-name {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.notification-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-time {
+  font-size: 0.75rem;
+  color: var(--secondary-color);
+}
+
+/* Acciones de notificación */
+.notification-actions {
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.notification-item:hover .notification-actions {
+  opacity: 1;
+}
+
+.action-btn-small {
+  background: none;
+  border: 1px solid var(--border-color);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn-small:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow);
+}
+
+.action-btn-small.success {
+  border-color: var(--success-color);
+  color: var(--success-color);
+}
+
+.action-btn-small.success:hover {
+  background-color: #5a6162;
+  color: white;
+}
+
+.action-btn-small.danger {
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+}
+
+.action-btn-small.danger:hover {
+  background-color: #5a6162;
+  color: white;
+}
+
+.action-btn-small.primary {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.action-btn-small.primary:hover {
+  background-color: #5a6162;
+  color: white;
+}
+
+.action-btn-small.secondary {
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.action-btn-small.secondary:hover {
+  background-color: #5a6162;
+  color: white;
+}
+
+/* Dropdown para posponer */
+.dropdown-container {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--box-shadow-lg);
+  min-width: 200px;
+  z-index: 1000;
+  padding: 0.5rem 0;
+}
+
+.dropdown-header {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--secondary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0.25rem;
+}
+
+.dropdown-item {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: var(--transition);
+}
+
+.dropdown-item:hover {
+  background-color: var(--light-bg);
+}
+
+.dropdown-item.border-bottom {
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0.25rem;
+}
+
+.dropdown-item .time {
+  font-size: 0.75rem;
+  color: var(--secondary-color);
+}
+
+/* Clases de colores para badges */
+.bg-primary-subtle { background-color: var(--primary-light) !important; }
+.bg-success-subtle { background-color: var(--success-light) !important; }
+.bg-warning-subtle { background-color: var(--warning-light) !important; }
+.bg-info-subtle { background-color: var(--info-light) !important; }
+.bg-danger-subtle { background-color: var(--danger-light) !important; }
+
+/* Animaciones */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.user-panel-modern.open {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notifications-panel {
+  animation: fadeInDown 0.3s ease-out;
+}
+
+@media (max-width: 768px) {
+  .modern-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .user-panel-modern {
+    width: 20rem;
+    height: 85vh;
+  }
+  
+  .notifications-panel {
+    width: calc(100vw - 2rem);
+    max-width: 400px;
+  }
+  
+  .panel-content {
+    padding: 1.5rem 1rem;
+  }
+  
+  .action-buttons-container {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 576px) {
+  .user-panel-modern {
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    border-radius: 0;
+  }
+  
+  .profile-cover {
+    height: 6rem;
+  }
+  
+  .panel-profile-image {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .notifications-panel {
+    width: calc(100vw - 1rem);
+    max-height: 80vh;
+  }
+}
+
+/* Scrollbar personalizada */
+.notifications-content::-webkit-scrollbar,
+.panel-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notifications-content::-webkit-scrollbar-track,
+.panel-content::-webkit-scrollbar-track {
+  background: var(--light-bg);
+}
+
+.notifications-content::-webkit-scrollbar-thumb,
+.panel-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.notifications-content::-webkit-scrollbar-thumb:hover,
+.panel-content::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-color);
+}
+
 
 </style>
 

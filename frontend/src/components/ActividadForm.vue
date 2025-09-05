@@ -1,11 +1,12 @@
 <template>
-  <form @submit.prevent="handleSubmit">
-    <h2 class="fs-3 mb-4">Registrar nueva actividad</h2>
-
-
-     <div class="row justify-content-between">
-        <div class="mb-3 ">
-          <label class="form-label">Proyecto</label>
+  <form @submit.prevent="handleSubmit" class="modal-form">
+    <div class="form-content">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            <i class="bi bi-kanban me-2"></i>
+            Proyecto
+          </label>
           <select v-model="form.project" :class="['form-select', errors.project && 'is-invalid']">
             <option value="" disabled selected>-- Seleccione el proyecto --</option>
             <option v-for="project in projects" :key="project.id_project" :value="project.id_project">
@@ -15,108 +16,149 @@
           <div v-if="errors.project" class="invalid-feedback">{{ errors.project }}</div>
         </div>
 
-        <!-- <div class="mb-3 col-6">
-          <label class="form-label">Finalización</label>
-          <input type="date" class="form-control" v-model="form.limited">
-        </div> -->
-    </div>
-
-
-
-    <div class="mb-3">
-      <label class="form-label">Actividad</label>
-      <textarea v-model="form.activity" class="form-control" :class="{ 'is-invalid': errors.activity }" rows="2"></textarea>
-      <div class="invalid-feedback" v-if="errors.activity">{{ errors.activity }}</div>
-    </div>
-
-    
-
-    <div class="mb-3">
-      <label class="form-label">Prioridad</label>
-      <div class="d-flex justify-content-between align-items-center gap-2" :class="{ 'is-invalid': errors.priority }">
-        <div class="priority-option" :class="{ 'priority-high': form.priority === 'Alta' }" @click="form.priority = 'Alta'">
-          <input v-model="form.priority" type="radio" name="priority" id="priorityHigh" value="Alta" class="d-none">
-          <label for="priorityHigh">Alta</label>
-        </div>
-        
-        <div class="priority-option" :class="{ 'priority-medium': form.priority === 'Media' }" @click="form.priority = 'Media'">
-          <input v-model="form.priority" type="radio" name="priority" id="priorityMedium" value="Media" class="d-none">
-          <label for="priorityMedium">Media</label>
-        </div>
-        
-        <div class="priority-option" :class="{ 'priority-low': form.priority === 'Baja' }" @click="form.priority = 'Baja'">
-          <input v-model="form.priority" type="radio" name="priority" id="priorityLow" value="Baja" class="d-none">
-          <label for="priorityLow">Baja</label>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            <i class="bi bi-clock me-2"></i>
+            Horas Trabajadas
+          </label>
+          <input 
+            type="number" 
+            v-model="form.horas"
+            class="form-control"
+            min="0"
+            step="0.5"
+            placeholder="0.0"
+          >
         </div>
       </div>
-      <div class="invalid-feedback d-block" v-if="errors.priority">{{ errors.priority }}</div>
-    </div>
-    
-    <div class="mb-3">
-      <label class="form-label">Descripción</label>
-      <textarea v-model="form.description" class="form-control" rows="3" :class="{ 'is-invalid': errors.description }"></textarea>
-      <div class="invalid-feedback" v-if="errors.description">{{ errors.description }}</div>
-    </div>
-   
-    <div class="d-flex">
-      <div class="mb-3" style="width: 70%;">
-        <label for="customRange4" class="form-label">Avance de la actividad</label>
+
+      <div class="mb-3">
+        <label class="form-label">
+          <i class="bi bi-card-text me-2"></i>
+          Actividad
+        </label>
+        <textarea 
+          v-model="form.activity" 
+          class="form-control" 
+          :class="{ 'is-invalid': errors.activity }" 
+          rows="2"
+          placeholder="Describe la actividad a realizar"
+        ></textarea>
+        <div class="invalid-feedback" v-if="errors.activity">{{ errors.activity }}</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">
+          <i class="bi bi-flag me-2"></i>
+          Prioridad
+        </label>
+        <div class="priority-container" :class="{ 'is-invalid': errors.priority }">
+          <div 
+            class="priority-option" 
+            :class="{ 'priority-high-active': form.priority === 'Alta' }"
+            @click="form.priority = 'Alta'"
+          >
+            <i class="bi bi-flag-fill text-danger me-2"></i>
+            <span>Alta</span>
+          </div>
+          
+          <div 
+            class="priority-option" 
+            :class="{ 'priority-medium-active': form.priority === 'Media' }"
+            @click="form.priority = 'Media'"
+          >
+            <i class="bi bi-flag-fill text-warning me-2"></i>
+            <span>Media</span>
+          </div>
+          
+          <div 
+            class="priority-option" 
+            :class="{ 'priority-low-active': form.priority === 'Baja' }"
+            @click="form.priority = 'Baja'"
+          >
+            <i class="bi bi-flag-fill text-success me-2"></i>
+            <span>Baja</span>
+          </div>
+        </div>
+        <div class="invalid-feedback d-block" v-if="errors.priority">{{ errors.priority }}</div>
+      </div>
+      
+      <div class="mb-3">
+        <label class="form-label">
+          <i class="bi bi-text-paragraph me-2"></i>
+          Descripción
+        </label>
+        <textarea 
+          v-model="form.description" 
+          class="form-control" 
+          rows="3" 
+          :class="{ 'is-invalid': errors.description }"
+          placeholder="Proporciona detalles adicionales sobre la actividad"
+        ></textarea>
+        <div class="invalid-feedback" v-if="errors.description">{{ errors.description }}</div>
+      </div>
+     
+      <div class="mb-4">
+        <label class="form-label d-flex justify-content-between">
+          <span>
+            <i class="bi bi-graph-up me-2"></i>
+            Avance de la actividad
+          </span>
+          <span class="range-value">{{ rangeValue }}%</span>
+        </label>
         <input 
-          class="form-range"
+          class="form-range custom-range"
           type="range"
-          id="customRange4"
-          ref="rangeInput"
           v-model="rangeValue"
           min="0"
           max="100"
         />
-        <span ref="rangeOutput">{{ rangeValue }} %</span>
+        <div class="range-labels d-flex justify-content-between mt-1">
+          <small class="text-muted">0%</small>
+          <small class="text-muted">100%</small>
+        </div>
       </div>
-      <div class="mb-3" style="width: 30%; margin-left: 1rem;">
-        <label for="" class="form-label">Horas Trabajadas</label>
-        <input type="number"
-        v-model="form.horas"
-        class="form-control">
+
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button type="button" class="btn btn-outline-secondary" @click="$emit('cancel')">
+          <i class="bi bi-x-circle me-2"></i>
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-circle me-2"></i>
+          Guardar
+        </button>
       </div>
     </div>
 
-
-    
-    <div class="d-flex justify-content-end gap-2">
-      <button type="button" class="btn btn-secondary" @click="$emit('cancel')">
-        Cancelar
-      </button>
-      <button type="submit" class="btn btn-primary">
-        Guardar
-      </button>
+    <!-- Modal de confirmación si se exceden las 8 horas -->
+    <div class="modal fade" id="horasModal" ref="horasModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title text-warning">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              Advertencia de Horas
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body py-4">
+            <p>El total de horas trabajadas hoy superará las 8 horas. ¿Deseas continuar?</p>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-warning" @click="confirmarGuardarActividad">
+              <i class="bi bi-check-lg me-2"></i>
+              Sí, guardar
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </form>
-
-
-  <!-- Modal de confirmación si se exceden las 8 horas -->
-<div class="modal fade bg-dark bg-opacity-75" id="horasModal" ref="horasModal" style="z-index: 1100;">
-  <div class="modal-dialog modal-dialog-centered" style="width: 30rem;">
-    <div class="modal-content rounded-5" style="background: rgba(238, 251, 80, 2);">
-      <div class="modal-header text-center row row-columns  border-0">
-        <h1 class="bi bi-exclamation-triangle-fill"></h1>
-        <h5 class="title fw-bold">Advertencia de Horas</h5>
-      </div>
-      <div class="modal-body text-center">
-        <p class="fw-medium">El total de horas trabajadas hoy superará las 8 horas. ¿Deseas continuar?</p>
-      </div>
-      <hr style="margin-left: 1rem; margin-right: 1rem;" class="text-black">
-      <div class="modal-footer d-flex justify-content-center border-0">
-        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-warning" @click="confirmarGuardarActividad">Sí, guardar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 </template>
 
 <script>
-
 import axios from 'axios'
 import { useToast } from 'vue-toastification'
 import { h } from 'vue'
@@ -125,14 +167,10 @@ import * as bootstrap from 'bootstrap'
 
 const user = JSON.parse(localStorage.getItem('user'))
 const usuario_creador = user?.id
-// console.log('Usuario creador:', usuario_creador)
-const rangeInput = document.getElementById('customRange4');
-const rangeOutput = document.getElementById('rangeValue');
 
 export default {
   name: 'TaskForm',
   emits: ['saved', 'cancel'],
-
   components: {
     CustomToast
   },
@@ -144,8 +182,7 @@ export default {
         activity: '',
         description: '',
         priority: '',
-        horas: '',
-        rangeValue: ''
+        horas: ''
       },
       errors: {},
       projects: [],
@@ -158,21 +195,9 @@ export default {
     }
   },
   async created() {
-    // Cargar proyectos al iniciar el componente
     await this.loadProjects();
   },
   mounted() {
-    // aquí puedes acceder a los refs si necesitas manipulación directa
-    const input = this.$refs.rangeInput
-    const output = this.$refs.rangeOutput
-
-    if (input && output) {
-      output.textContent = input.value
-      input.addEventListener('input', function () {
-        output.textContent = this.value
-      })
-    }
-    // Instanciar el modal
     const modalElement = this.$refs.horasModal
     if (modalElement) {
       this.modalInstance = new bootstrap.Modal(modalElement)
@@ -189,7 +214,7 @@ export default {
     },
 
     validateForm() {
-      this.errors = {} // resetear errores
+      this.errors = {}
       if (!this.form.project) {
         this.errors.project = 'Selecciona un proyecto'
       }
@@ -197,7 +222,7 @@ export default {
         this.errors.activity = 'Este campo es obligatorio'
       }
       if (!this.form.priority) {
-        this.errors.priority = 'Esto es obligatorio'
+        this.errors.priority = 'Selecciona una prioridad'
       }
       if (!this.form.description) {
         this.errors.description = 'Este campo es obligatorio'
@@ -210,7 +235,6 @@ export default {
       if (!this.validateForm()) return
 
       try {
-        // Consultar horas actuales del usuario
         const userId = usuario_creador
         const res = await fetch(`http://localhost:4001/api/usuarios/${userId}/horas-hoy`)
         const data = await res.json()
@@ -219,7 +243,6 @@ export default {
         const totalHoras = parseFloat(this.horasHoy) + parseFloat(this.form.horas || 0)
 
         if (totalHoras > 8) {
-          // Supera 8 horas, guardar los datos pendientes y abrir modal
           this.pendienteGuardar = {
             ...this.form,
             avance: this.rangeValue
@@ -287,6 +310,7 @@ export default {
         }))
       }
     },
+    
     resetForm() {
       this.form = {
         user: '',
@@ -294,64 +318,228 @@ export default {
         activity: '',
         description: '',
         priority: '',
-        limited: ''
-      };
-    },
+        horas: ''
+      }
+      this.rangeValue = 0
+    }
   }
 }
 </script>
 
 <style scoped>
-/* input[type="date"] {
-  border: 1px solid #ced4da;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  background-color: #f8f9fa;
-  font-size: 1rem;
+/* Variables CSS definidas localmente */
+.modal-form {
+  --primary-color: rgb(105, 28, 32);
+  --primary-light: #dbeafe;
+  --success-color: #10b981;
+  --success-light: #d1fae5;
+  --warning-color: #f59e0b;
+  --warning-light: #fef3c7;
+  --info-color: #06b6d4;
+  --info-light: #cffafe;
+  --danger-color: #ef4444;
+  --danger-light: #fee2e2;
+  --secondary-color: #6b7280;
+  --light-bg: #f8fafc;
+  --border-color: #e5e7eb;
+  --border-radius: 0px;
+  --border-radius-sm: 0px;
+  --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --transition: all 0.3s ease;
 }
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.4);
-  cursor: pointer;
-} */
 
+.modal-form {
+  background: white;
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden; /* Evita scroll en el contenedor principal */
+}
 
-/* Tus estilos originales se mantienen igual */
+.form-content {
+  padding: 1.5rem;
+  overflow-y: auto; /* Permite scroll interno */
+  flex-grow: 1;
+  /* Scroll invisible pero funcional */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.form-content::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+/* Estilos para el desplazamiento táctil en dispositivos móviles */
+.form-content {
+  -webkit-overflow-scrolling: touch; /* Desplazamiento suave en iOS */
+}
+
+.form-label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.form-control, .form-select {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 0.75rem 1rem;
+  transition: var(--transition);
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+
+.priority-container {
+  display: flex;
+  gap: 0.75rem;
+}
+
 .priority-option {
-  height: 2.5rem;
-  width: 100%;
-  border: 1px solid #dee2e6;
-  border-radius: 0.375rem;
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.priority-option label {
-  cursor: pointer;
-  margin-bottom: 0;
-}
-
-.priority-high {
-  background-color: rgba(220, 53, 69, 0.1);
-  border-color: rgba(220, 53, 69, 0.3);
-  color: #dc3545;
-}
-
-.priority-medium {
-  background-color: rgba(255, 193, 7, 0.1);
-  border-color: rgba(255, 193, 7, 0.3);
-  color: #ffc107;
-}
-
-.priority-low {
-  background-color: rgba(25, 135, 84, 0.1);
-  border-color: rgba(25, 135, 84, 0.3);
-  color: #198754;
 }
 
 .priority-option:hover {
-  background-color: #f8f9fa;
+  background-color: var(--light-bg);
+}
+
+.priority-high-active {
+  background-color: var(--danger-light);
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+}
+
+.priority-medium-active {
+  background-color: var(--warning-light);
+  border-color: var(--warning-color);
+  color: var(--warning-color);
+}
+
+.priority-low-active {
+  background-color: var(--success-light);
+  border-color: var(--success-color);
+  color: var(--success-color);
+}
+
+.custom-range {
+  height: 8px;
+  border-radius: 4px;
+  background: #e5e7eb;
+}
+
+.custom-range::-webkit-slider-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.custom-range::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: none;
+}
+
+.range-value {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.range-labels {
+  font-size: 0.75rem;
+}
+
+.btn {
+  border-radius: var(--border-radius-sm);
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  transition: var(--transition);
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  border: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.btn-secondary {
+  background: white;
+  border: 1px solid var(--border-color);
+  color: var(--secondary-color);
+}
+
+.btn-secondary:hover {
+  background: var(--light-bg);
+}
+
+/* Efecto visual para indicar que hay más contenido */
+.form-content:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: linear-gradient(to bottom, transparent, white);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.form-content.scrolling:after {
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .priority-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .form-content {
+    padding: 1rem;
+  }
+  
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Pequeño ajuste para mejorar la experiencia en móviles */
+@media (max-width: 576px) {
+  .form-content {
+    padding-bottom: 2rem; /* Espacio extra al fondo para mejor desplazamiento */
+  }
 }
 </style>

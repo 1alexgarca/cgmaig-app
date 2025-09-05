@@ -15,7 +15,7 @@ const toggleCollapse = () => {
 const mainRoutes = computed(() => {
   return router.options.routes.filter(
     route =>
-      route.name &&                      // 👈 Asegura que tenga nombre
+      route.name &&
       !route.meta?.group &&
       route.meta?.showSidebar !== false &&
       route.meta?.showInSidebar !== false
