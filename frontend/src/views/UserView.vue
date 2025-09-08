@@ -12,7 +12,7 @@
               </div>
               <div class="ms-3 flex-grow-1">
                 <p class="stats-label mb-1">Tareas Completadas</p>
-                <h3 class="stats-value mb-0">{{ tareasCompletadas }}</h3>
+                <h3 class="stats-value mb-0">{{ tareascompletadas }}</h3>
                 <small :class="getTextClass(porcentajeCompletadas)">
                   <i :class="['bi', getIconClass(porcentajeCompletadas), 'me-1']"></i>
                   {{ porcentajeCompletadas }}% completado
@@ -36,7 +36,7 @@
               </div>
               <div class="ms-3 flex-grow-1">
                 <p class="stats-label mb-1">Tareas Pendientes</p>
-                <h3 class="stats-value mb-0">{{ tareasNoCompletadas }}</h3>
+                <h3 class="stats-value mb-0">{{ tareasnocompletadas }}</h3>
                 <small :class="getTextClass(porcentajeNoCompletadas)">
                   <i :class="['bi', getIconClass(porcentajeNoCompletadas), 'me-1']"></i>
                   {{ porcentajeNoCompletadas }}% pendiente
@@ -60,7 +60,7 @@
               </div>
               <div class="ms-3 flex-grow-1">
                 <p class="stats-label mb-1">Tareas por Vencer</p>
-                <h3 class="stats-value mb-0">{{ tareasPorVencer }}</h3>
+                <h3 class="stats-value mb-0">{{ tareasporvencer }}</h3>
                 <small class="text-warning">
                   <i class="bi bi-exclamation-triangle me-1"></i>
                   Requieren atención
@@ -68,7 +68,7 @@
               </div>
             </div>
             <div class="stats-progress mt-3">
-              <div class="progress-bar bg-warning" :style="`width: ${Math.min((tareasPorVencer / 10) * 100, 100)}%`"></div>
+              <div class="progress-bar bg-warning" :style="`width: ${Math.min((tareasporvencer / 10) * 100, 100)}%`"></div>
             </div>
           </div>
         </div>
@@ -84,15 +84,15 @@
               </div>
               <div class="ms-3 flex-grow-1">
                 <p class="stats-label mb-1">Nuevas Asignaciones</p>
-                <h3 class="stats-value mb-0">{{ nuevasAsignaciones }}</h3>
+                <h3 class="stats-value mb-0">{{ nuevasasignaciones }}</h3>
                 <small class="text-info">
                   <i class="bi bi-arrow-up me-1"></i>
-                  +{{ nuevasAsignaciones }} esta semana
+                  +{{ nuevasasignaciones }} esta semana
                 </small>
               </div>
             </div>
             <div class="stats-progress mt-3">
-              <div class="progress-bar bg-info" :style="`width: ${Math.min((nuevasAsignaciones / 5) * 100, 100)}%`"></div>
+              <div class="progress-bar bg-info" :style="`width: ${Math.min((nuevasasignaciones / 5) * 100, 100)}%`"></div>
             </div>
           </div>
         </div>
@@ -157,10 +157,10 @@ export default defineComponent({
     return {
       progresChart: null,
       lineChart: null,
-      tareasCompletadas: 0,
-      tareasNoCompletadas: 0,
-      tareasPorVencer: 0,
-      nuevasAsignaciones: 0,
+      tareascompletadas: 0,
+      tareasnocompletadas: 0,
+      tareasporvencer: 0,
+      nuevasasignaciones: 0,
       hayDatosDona: false,
       hayDatosLinea: false,
       porcentajeCompletadas: 0,
@@ -181,15 +181,15 @@ export default defineComponent({
         const res = await axios.get(`http://localhost:4001/api/dashboard/estadisticas/${user.id}`)
         const data = res.data
 
-        const total = this.tareasCompletadas + this.tareasNoCompletadas
+        const total = this.tareascompletadas + this.tareasnocompletadas
 
-        this.porcentajeCompletadas = total > 0 ? Math.round((this.tareasCompletadas / total) * 100) : 0;
-        this.porcentajeNoCompletadas = total > 0 ? Math.round((this.tareasNoCompletadas / total) * 100) : 0;
+        this.porcentajeCompletadas = total > 0 ? Math.round((this.tareascompletadas / total) * 100) : 0;
+        this.porcentajeNoCompletadas = total > 0 ? Math.round((this.tareasnocompletadas / total) * 100) : 0;
 
-        this.tareasCompletadas = data.tareasCompletadas
-        this.tareasNoCompletadas = data.tareasNoCompletadas
-        this.tareasPorVencer = data.tareasPorVencer
-        this.nuevasAsignaciones = data.nuevasAsignaciones
+        this.tareascompletadas = data.tareascompletadas
+        this.tareasnocompletadas = data.tareasnocompletadas
+        this.tareasporvencer = data.tareasporvencer
+        this.nuevasasignaciones = data.nuevasasignaciones
       } catch (error) {
         console.error('Error al cargar estadísticas:', error)
       }

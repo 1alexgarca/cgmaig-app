@@ -310,30 +310,40 @@ onBeforeUnmount(() => {
                     <span class="custom-tooltip">Marcar como leída</span>
                   </div>
 
-                  <div class="tooltip-container">
-                    <button class="action-btn-small secondary rounded-3" @click="toggleDropdown">
+                  <div class="tooltip-container dropdown-container">
+                    <button class="action-btn-small secondary rounded-3" @click="toggleDropdown(notificacion.id_push)">
                       <i class="bi bi-clock"></i>
                     </button>
-                    <ul v-show="mostrarOpciones" class="custom-dropdown">
-                      <li class="pe-5" disabled>Posponer hasta...</li>
-                      <li class="d-flex justify-content-between" @click="posponerNotificacion(30, notificacion.id_push)">
-                        <span>Hoy más tarde</span> 
-                        <span class="ps-3">30 mim</span>
-                      </li>
-                      <li class="d-flex justify-content-between" @click="posponerNotificacion(60, notificacion.id_push)">
-                        <span>...</span>
-                        <span>1 hora</span>
-                      </li>
-                      <li class="d-flex justify-content-between border-bottom" @click="posponerNotificacion(120, notificacion.id_push)">
-                        <span>...</span>
-                        <span>2 horas</span>
-                      </li>
-                      <li @click="posponerActividad(notificacion.id_push)">
-                        <span><i class="bi bi-calendar-event"></i></span>
-                        <span class="ps-2"><i>Elegir fecha y hora</i></span>
-                      </li>
-                    </ul>
                     <span class="custom-tooltip">Posponer</span>
+                    
+                    <teleport to="body">
+                      <transition name="fade">
+                        <div v-if="mostrarOpciones && notificacionActiva === notificacion.id_push" class="global-dropdown-menu">
+                          <ul>
+                            <li class="dropdown-header">Posponer hasta...</li>
+                            <li class="dropdown-item" @click="posponerNotificacion(30, notificacion.id_push)">
+                              <span>Hoy más tarde</span>
+                              <span class="time">30 min</span>
+                            </li>
+                            <li class="dropdown-item" @click="posponerNotificacion(60, notificacion.id_push)">
+                              <span>...</span>
+                              <span class="time">1 hora</span>
+                            </li>
+                            <li class="dropdown-item" @click="posponerNotificacion(120, notificacion.id_push)">
+                              <span>Hoy más tarde</span>
+                              <span class="time">2 horas</span>
+                            </li>
+                            <li class="dropdown-item border-bottom" @click="posponerActividad(notificacion.id_push)">
+                              <span class="bi-bi-calendar-event"></span>
+                              <span class="ps-2">
+                                <i>Elegir fecha y hora</i>
+                              </span>
+                            </li>
+                          </ul>
+                        </div>
+                      </transition>
+                    </teleport>
+
                   </div>
                 </div>
               </div>
@@ -443,14 +453,13 @@ onBeforeUnmount(() => {
 import axios from 'axios'
 import { useToast } from 'vue-toastification';
 import CustomToast from './CustomToast.vue';
-import { h } from 'vue'
+import { h, ref } from 'vue'
 import PosponerModal from '@/components/PospuestaModal.vue'
 import defaultImage from '@/assets/perfil.webp'
 
-
 const toast = useToast()
 const user = JSON.parse(localStorage.getItem('user'))
-const userId = user?.id  // Asegúrate que sea `id_user` si tu objeto lo tiene así
+const userId = user?.id 
 
 export default {
   data() {
@@ -463,13 +472,38 @@ export default {
       intervaloNotificaciones: null,
       pestañaActiva: 'no-leidas',
       mostrarOpciones: false,
+      notificacionActiva: null,
       showModal: false,
       notificacionSeleccionada: null,
       imagen: user.imagen || defaultImage,
-      imagenUrl: ''
+      imagenUrl: '',
+      menuStyle: {}
     }
   },
   methods: {
+    abrirMenu(event, id) {
+      this.notificacionActiva = id
+      this.mostrarOpciones = true
+      
+      const rect = event.currentTarget.getBoundingClientRect()
+
+      this.menuStyle = {
+        position: "fixed",
+        top: rect.bottom + "px",
+        left: rect.left - 200 + "px",
+        zIndex: 9999
+      }
+    },
+    toggleDropdown(id) {
+      if (this.notificacionActiva === id) {
+        this.notificacionActiva = null
+        this.mostrarOpciones = false 
+      } else {
+        this.notificacionActiva = id
+        this.mostrarOpciones = true
+      }
+    },
+
     toggleNotificaciones() {
       this.mostrarNotificaciones = !this.mostrarNotificaciones
     },
@@ -575,9 +609,9 @@ export default {
         )
       }
     },
-    toggleDropdown() {
-      this.mostrarOpciones = !this.mostrarOpciones
-    },
+    // toggleDropdown() {
+    //   this.mostrarOpciones = !this.mostrarOpciones
+    // },
     posponerActividad(id_push) {
       console.log('ID ENVIADO', id_push)
       this.showModal = true
@@ -681,6 +715,62 @@ export default {
   transform: translateX(-100%);
 }
 
+.global-dropdown-menu {
+  position: absolute;
+  top: 0;               /* ajustar verticalmente si quieres debajo: top: 100% */
+  right: 100%;          /* <-- aquí aparece a la izquierda del botón */
+  margin-right: 0.5rem; /* separación del botón */
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  min-width: 200px;
+}
+
+.global-dropdown-menu ul {
+  list-style: none;
+  padding: 0;
+}
+
+.dropdown-header {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+}
+
+.dropdown-item {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+
+.dropdown-item.border-bottom {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.dropdown-item .time {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+/* Transición para el menú */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.2s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
 /* Para aparecer los icons en la notificación tipo vencimiento */
 .notificacion-hover {
   position: relative;
@@ -778,35 +868,6 @@ export default {
 }
 
 
-/* Dropdown para posponer */
-.posponer-dropdown {
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
-}
-
-.custom-dropdown {
-  position: absolute;
-  top: 110%; /* debajo del botón */
-  right: 0;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 0.5rem;
-  padding: 0.5rem 0;
-  z-index: 1000;
-  width: max-content;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.custom-dropdown li {
-  padding: 8px 16px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.custom-dropdown li:hover {
-  background-color: #f1f1f1;
-}
 
 .nav-link:hover {
   background-color: transparent;
@@ -1032,58 +1093,6 @@ export default {
   color: white;
 }
 
-/* Dropdown para posponer */
-.dropdown-container {
-  position: relative;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-sm);
-  box-shadow: var(--box-shadow-lg);
-  min-width: 200px;
-  z-index: 1000;
-  padding: 0.5rem 0;
-}
-
-.dropdown-header {
-  padding: 0.5rem 1rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--secondary-color);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 0.25rem;
-}
-
-.dropdown-item {
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  font-size: 0.875rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: var(--transition);
-}
-
-.dropdown-item:hover {
-  background-color: var(--light-bg);
-}
-
-.dropdown-item.border-bottom {
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 0.25rem;
-}
-
-.dropdown-item .time {
-  font-size: 0.75rem;
-  color: var(--secondary-color);
-}
 
 /* Clases de colores para badges */
 .bg-primary-subtle { background-color: var(--primary-light) !important; }

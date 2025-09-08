@@ -113,26 +113,26 @@
                 <div class="row g-3 mb-4">
                   <div class="col-md-4">
                     <label class="form-label fw-semibold">Nombre</label>
-                    <input v-model="nombre" type="text" class="form-control" placeholder="Ingresa tu nombre">
+                    <input v-model="nombre" type="text" class="form-control border" placeholder="Ingresa tu nombre">
                   </div>
                   <div class="col-md-4">
                     <label class="form-label fw-semibold">Apellido Paterno</label>
-                    <input v-model="paterno" type="text" class="form-control" placeholder="Apellido paterno">
+                    <input v-model="paterno" type="text" class="form-control border" placeholder="Apellido paterno">
                   </div>
                   <div class="col-md-4">
                     <label class="form-label fw-semibold">Apellido Materno</label>
-                    <input v-model="materno" type="text" class="form-control" placeholder="Apellido materno">
+                    <input v-model="materno" type="text" class="form-control border" placeholder="Apellido materno">
                   </div>
                 </div>
 
                 <div class="row g-3 mb-4">
                   <div class="col-md-6">
                     <label class="form-label fw-semibold">Número de Celular</label>
-                    <input v-model="telefono" type="text" class="form-control" placeholder="Número de contacto">
+                    <input v-model="telefono" type="text" class="form-control border" placeholder="Número de contacto">
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-semibold">Correo Electrónico</label>
-                    <input v-model="email" type="email" class="form-control" disabled>
+                    <input v-model="email" type="email" class="form-control border" disabled>
                     <small class="text-muted">El correo electrónico no puede ser modificado</small>
                   </div>
                 </div>
@@ -162,7 +162,7 @@
                     <input 
                       v-model="form.actual"
                       type="password"
-                      class="form-control"
+                      class="form-control border"
                       placeholder="Ingresa tu contraseña actual"
                       autocomplete="current-password"
                       @input="verificarPasswordActual"
@@ -183,14 +183,14 @@
                       v-model="form.nueva"
                       placeholder="Crea una nueva contraseña"
                       autocomplete="new-password"
-                      class="form-control"
+                      class="form-control border"
                     >
                   </div>
                   <div class="col-md-4">
                     <label class="form-label fw-semibold">Repetir Contraseña</label>
                     <input 
                       type="password" 
-                      class="form-control"
+                      class="form-control border"
                       placeholder="Confirma tu nueva contraseña"
                       autocomplete="new-password"
                       v-model="form.repetir"
